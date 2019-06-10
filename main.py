@@ -14,13 +14,7 @@ import shapely
 
 ## Provincias
 
-with open('Provincias.txt') as fh:
-    filecont=fh.readlines()
-
-provincia=[]
-for line in filecont:
-    current=line[:-1]
-    provincia.append(current)
+provincia=['A Coruna','Alava','Albacete','Alicante','Almeria','Asturias','Avila','Badajoz','Barcelona','Bizkaia','Burgos','Caceres','Cadiz','Cantabria','Castellon','Ceuta','Ciudad Real','Cordoba','Cuenca','Gipuzkoa','Girona','Granada','Guadalajara','Huelva','Huesca','Illes Balears','Jaen','La Rioja','Las Palmas','Leon','Lleida','Lugo','Madrid','Malaga','Melilla','Murcia','Navarra','Oursense','Palencia','Pontevedra','Salamanca','Segovia','Sevilla','Soria','Tarragona','Tenerife','Teruel','Toledo','Valencia','Valladolid','Zamora','Zaragoza']
 
 ## Resultados
 
@@ -30,13 +24,7 @@ for prov in provincia:
 
 ## Escaños
 
-with open('Diputados.txt') as fh:
-    filecont=fh.readlines()
-
-Diputados={}
-for line in filecont:
-    key,val=line.split(sep=': ')
-    Diputados[key]=pd.to_numeric(val[:-1])
+Diputados={'A Coruna': 8,'Alava': 4,'Albacete': 4,'Alicante': 12,'Almeria': 6,'Asturias': 7,'Avila': 3,'Badajoz': 6,'Barcelona': 32,'Bizkaia': 8,'Burgos': 4,'Caceres': 4,'Cadiz': 9,'Cantabria': 5,'Castellon': 5,'Ceuta': 1,'Ciudad Real': 5,'Cordoba': 6,'Cuenca': 3,'Gipuzkoa': 6,'Girona': 6,'Granada': 7,'Guadalajara': 3,'Huelva': 5,'Huesca': 3,'Illes Balears': 8,'Jaen': 5,'La Rioja': 4,'Las Palmas': 8,'Leon': 4,'Lleida': 4,'Lugo': 4,'Madrid': 37,'Malaga': 11,'Melilla': 1,'Murcia': 10,'Navarra': 5,'Oursense': 4,'Palencia': 3,'Pontevedra': 7,'Salamanca': 4,'Segovia': 3,'Sevilla': 12,'Soria': 2,'Tarragona': 6,'Tenerife': 7,'Teruel': 3,'Toledo': 6,'Valencia': 15,'Valladolid': 5,'Zamora': 3,'Zaragoza': 7}
 
 # Funciones
 
@@ -134,8 +122,8 @@ def CreateColorMap():
 
 def MoverCanarias(Geo,x=0,y=0):
     
-    for i in esp.loc[esp['adm0_sr']==3].index:
-        Geo['geometry'].loc[i]=shapely.affinity.translate(esp['geometry'].loc[i], xoff=x, yoff=y)
+    for i in Geo.loc[Geo['adm0_sr']==3].index:
+        Geo['geometry'].loc[i]=shapely.affinity.translate(Geo['geometry'].loc[i], xoff=x, yoff=y)
     
     return Geo
 
