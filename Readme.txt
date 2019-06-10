@@ -1,6 +1,6 @@
 ELECTOPY project:
 
-Superfluid Library for Operations Transformations and Hacking
+Library for the analysis of electoral results.
 
 To install this magnificent library you must introduce this code:
 
