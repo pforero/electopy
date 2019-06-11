@@ -31,42 +31,140 @@ Diputados={'A Coruna': 8,'Alava': 4,'Albacete': 4,'Alicante': 12,'Almeria': 6,'A
 
 # NEW ELECTION DOWNLOAD
 
-urllib.request.urlretrieve('http://www.infoelectoral.mir.es/infoelectoral/docxl/PROV_02_201606_1.zip', 'New Results/PROV_02_201606_1.zip')
-archive = zipfile.ZipFile('New Results/PROV_02_201606_1.zip', 'r')
-csvfile = archive.open('PROV_02_201606_1.xlsx')
+def MIR():
+    
+    past_elections={2016:'PROV_02_201606_1.zip'}
+    
+    return past_elections
 
-df=pd.read_excel(csvfile,skiprows=range(3))
+def GetFileName(year=2016):
+    
+    past_elections=MIR()
+    
+    try:
+        filename=past_elections[year]
+    except:
+        filename=past_elections[2016]
+        
+    return filename
 
-## Partidos
+def DescargarElecciones(year=2016,save_folder='New Results'):
+    
+    miraddress='http://www.infoelectoral.mir.es/infoelectoral/docxl/'
+    filename=GetFileName(year)
+        
+    url=miraddress+filename
+    location=save_folder+'/'+filename
+    urllib.request.urlretrieve(url, location)
 
-Partidos=df.loc[0,(df.loc[1]=='Votos')]
+def GetFile_as_DF(file_name):
+    
+    if file_name.endswith('.zip'):
+        
+        end_file=file_name.rsplit('/')[-1][:-4]+'.xlsx'
+        archive = zipfile.ZipFile(file_name,'r')
+        xlsxfile = archive.open(end_file)
+        
+    else:
+        
+        xlsxfile = file_name
+        
+    return pd.read_excel(xlsxfile,skiprows=range(3))
 
-## Provincias
+def CargarElecciones(file_name=None,year=2016,save_folder='New Results'):
+    
+    if file_name:
+        
+        try:
+            
+            GetFile_as_DF(file_name)
+            
+        except:
+            
+            print('File Not Found!')
+    else:
+        
+        past_elections=MIR()
+        file_name=save_folder+'/'+GetFileName(year)
+        
+        try:
+            
+            df=GetFile_as_DF(file_name)
+            
+        except:
+            
+            DescargarElecciones(year=year,save_folder=save_folder)
+            df=GetFile_as_DF(file_name)
+            
+    return df
 
-colNombre=df.columns[df.loc[1]=='Nombre de Provincia']
-colCodigo=df.columns[df.loc[1]=='Código de Provincia']
-prov=df.loc[2:,colNombre].iloc[:,0].str.strip()
-prov.index=df.loc[2:,colCodigo].iloc[:,0]
-prov.index.name='Provincias'
-Provincias=prov
+def LimpiarPartidos(df):
+    
+    Partidos=df.loc[0,(df.loc[1]=='Votos')]
+    Partidos.name='Partidos'
+    Partidos.index.name='Nombre Largo'
+    
+    return Partidos
 
-## Votos
+def LimpiarProvincias(df):
+    
+    colNombre=df.columns[df.loc[1]=='Nombre de Provincia']
+    colCodigo=df.columns[df.loc[1]=='Código de Provincia']
+    
+    prov=df.loc[2:,colNombre].iloc[:,0].str.strip()
+    prov.index=df.loc[2:,colCodigo].iloc[:,0]
+    prov.index.name='Codigo de Provincia'
+    
+    Provincias=prov
+    Provincias.name='Provincias'
+    
+    return Provincias
 
-vot=df.loc[:,~(df.loc[1]=='Diputados')]
-colnames=pd.concat([votos.loc[1,~(dip.loc[1]=='Votos')],Partidos]).values
-vot.columns=colnames
-Votos=vot.drop([0,1]).set_index('Código de Provincia')
+def LimpiarVotos(df):
+    
+    Partidos=LimpiarPartidos(df)
+    colCodigo=df.columns[df.loc[1]=='Código de Provincia']
+    
+    Votos=df.loc[2:,(df.loc[1]=='Votos')]
+    Votos.columns=Partidos.values
+    Votos.columns.name='Partido'
+    
+    Votos=Votos.set_index(df.loc[2:,colCodigo].values.squeeze())
+    Votos.index.name='Codigo de Provincia'
+    Votos.name='Votos'
+    
+    return Votos
 
-## Diputados
+def LimpiarDiputados(df):
+    
+    Partidos=LimpiarPartidos(df)
+    colCodigo=df.columns[df.loc[1]=='Código de Provincia']
+    
+    Votos=df.loc[2:,(df.loc[1]=='Diputados')]
+    Votos.columns=Partidos.values
+    Votos.columns.name='Partido'
+    
+    Votos=Votos.set_index(df.loc[2:,colCodigo].values.squeeze())
+    Votos.index.name='Codigo de Provincia'
+    Votos.name='Diputados'
+    
+    return Votos
 
-dip=df.loc[:,~(df.loc[1]=='Votos')]
-colnames=pd.concat([dip.loc[1,~(dip.loc[1]=='Diputados')],Partidos]).values
-dip.columns=colnames
-diputados=dip.drop([0,1]).set_index('Código de Provincia')
+def DistribucionEscanos(diputados):
+    
+    escanos = diputados.loc[:,Partidos].sum(axis=1)
+    
+    return escanos
 
-## Diputados por Provincia
-
-diputados_x_provincia=diputados.loc[:,Partidos].sum(axis=1)
+def LimpiarDF(df):
+    
+    partidos = LimpiarPartidos(df)
+    provincias = LimpiarProvincias(df)
+    votos = LimpiarVotos(df)
+    diputados = LimpiarDiputados(df)
+    escanos = DistribucionEscanos(diputados)
+    
+    return partidos, provincias, votos, escanos
 
 # Funciones
 
