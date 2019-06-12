@@ -197,7 +197,7 @@ def CalcularDiputados(Res,Dips):
     div=np.array([1/i for i in range(1,Dips+1)])
     df=Res.apply(lambda x: x*div).apply(pd.Series).unstack().sort_values(ascending=False)[:Dips]
     x=df.index.get_level_values(1).value_counts()
-    
+
     return x
 
 ## Composicion Parlmanetaria
@@ -237,22 +237,23 @@ def Elecciones(Votos, Dip):
 def DicNombres():
     
     mapdict={
-    'CÃ¡ceres': 'Caceres',
-    'LÃ©rida': 'Lleida',
-    'Gerona': 'Girona',
-    'Orense': 'Oursense',
-    'CÃ¡diz': 'Cadiz',
-    'CastellÃ³n': 'Castellon',
-    'AlmerÃ­a': 'Almeria',
-    'MÃ¡laga': 'Malaga',
-    'La CoruÃ±a': 'A Coruna',
-    'Santa Cruz de Tenerife': 'Tenerife',
+    'CÃ¡ceres': 'Cáceres',
+    'Orense': 'Ourense',
+    'CÃ¡diz': 'Cádiz',
+    'CastellÃ³n': 'Castellón / Castelló',
+    'AlmerÃ­a': 'Almería',
+    'MÃ¡laga': 'Málaga',
+    'La CoruÃ±a': 'A Coruña',
+    'Ãlava': 'Araba - Álava',
+    'LeÃ³n': 'León',
+    'Ãvila': 'Ávila',
+    'CÃ³rdoba': 'Córdoba',
+    'JaÃ©n': 'Jaén',
+    'Alicante': 'Alicante / Alacant',
+    'Valencia':'Valencia / València',
     'Baleares': 'Illes Balears',
-    'Ãlava': 'Alava',
-    'LeÃ³n': 'Leon',
-    'Ãvila': 'Avila',
-    'CÃ³rdoba': 'Cordoba',
-    'JaÃ©n': 'Jaen'
+    'Gerona': 'Girona',
+    'LÃ©rida': 'Lleida'
     }
     
     return mapdict
@@ -293,7 +294,7 @@ def Mapa(Res,text=''):
     
     esp['prov']=esp['name'].replace(mapdict)
     
-    merge=esp.set_index('prov').join(Res['Circunscripcion'])
+    merge=esp.set_index('prov').join(pd.DataFrame(data=Res['Circunscripcion'].values,index=Res['Circunscripcion'].index.map(provincias)))
     
     colormap=CreateColorMap()
     
@@ -332,16 +333,25 @@ def CreateColors(Partidos):
         'PSOE':'#ED1C24',
         'PP': '#0055A7',
         'Cs': '#FA5000',
+        "C's": '#FA5000',
         'Podemos': '#6A2E68',
+        'PODEMOS-IU-EQUO': '#6A2E68',
+        'ECP': '#6A2E68',
+        'PODEMOS-EN MAREA-ANOVA-EU': '#6A2E68',
         'VOX': '#5AC035',
         'ERC': '#F3B217',
+        'ERC-CATSÍ': '#F3B217',
+        'CDC': '#C40048',
         'JxCAT': '#C40048',
         'PNV': '#009526',
+        'EAJ-PNV': '#009526',
         'EH Bildu': '#A3C940',
         'NA+': '#FFDA1A',
         'CC': '#E51C13',
+        'CCa-PNC': '#E51C13',
         'PRC': '#DB6426',
-        'COMPROMÍS': '#BECD48'
+        'COMPROMÍS': '#BECD48',
+        'PODEMOS-COMPROMÍS-EUPV': '#BECD48',
     }
     
     return Partidos.map(PartyColors).values
@@ -350,11 +360,11 @@ def CreateColors(Partidos):
 
 def Composicion(Res,text=''):
     
-    sortedparl=Res['Parlamento'].Total.sort_values(ascending=False)
+    sortedparl=Res['Parlamento'].loc['Total'].sort_values(ascending=False)
     
-    label=CreateLabels(sortedparl)
+    label=CreateLabels(sortedparl.rename(partidos))
     
-    colors=CreateColors(sortedparl.index)
+    colors=CreateColors(sortedparl.rename(partidos).index)
     
     plt.rcParams.update({'font.size':12})
 
