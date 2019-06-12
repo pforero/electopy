@@ -220,41 +220,40 @@ def Composicion(Res,text=''):
     plt.title('Composicion del Parlamento'+text,fontdict={'fontsize':32})
     plt.show()
 
-# Procedural Test
-
-Res1=Elecciones(votos,diputados)
-Mapa(Res1)
-Composicion(Res1)
-
-######################################### WORK IN PROGRESS ####### DOES NOT WORK ####################################################################
-
 # Cambio Electoral
 
 ## Nuevo Resultado
 
 def NuevoResultado(Res,Part1,Part2,Peso=1):
+    
     NRes=Res.copy()
-    if np.isin('NA+',NRes.index) & ((Part1=='PP') | (Part1=='Cs')):
-        Part1='NA+'
-    if np.isin(Part1,NRes.index) & np.isin(Part2,NRes.index):
-        NRes.loc[Part1]=NRes.loc[Part1]+(NRes.loc[Part2]*Peso)
-        NRes.loc[Part2]=NRes.loc[Part2]*(1-Peso)
+    NRes[Part1]=NRes[Part1]+NRes[Part2]*Peso
+    NRes[Part2]=NRes[Part2]*(1-Peso)
+    
     return NRes
 
 ## Nuevas Elecciones
 
-def NuevasElecciones(Provincia, Votos, Diputados, Partido1, Partido2, Peso=1):
+def NuevasElecciones(Votos, Diputados, Partido1, Partido2, Peso=1):
     
     NVotos={}
-    NVotos['Partido1']=Partido1
-    NVotos['Partido2']=Partido2
+    NVotos['Partido1']=partidos[partidos==Partido1].index[0]
+    NVotos['Partido2']=partidos[partidos==Partido2].index[0]
     NVotos['Peso']=Peso
-    for prov in Provincia:
-        NVotos[prov]=NuevoResultado(Votos[prov],Partido1, Partido2, Peso)
     
-    return Elecciones(Provincia, NVotos, Diputados)
+    NVotos['Votos']=NuevoResultado(Votos,NVotos['Partido1'],NVotos['Partido2'],Peso)
+    
+    return Elecciones(NVotos['Votos'], Diputados)
 
-# Diferencia
+    # Procedural Test
+
+Res1=Elecciones(votos,diputados)
+Res2=NuevasElecciones(votos,diputados,'PP','PSOE',1)
+Mapa(Res1)
+Composicion(Res2)
+
+############################################ Diferencia (Legacy) ##############################################################
+# Lo dejo como referencia. Pero hasta no crear todo nuevo, esto es demasiado complejo para tocarlo cada vez que cambiamos algo
 
 def Diferencia(Res,NRes):
     
