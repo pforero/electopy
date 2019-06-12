@@ -34,6 +34,21 @@ Diputados={'A Coruna': 8,'Alava': 4,'Albacete': 4,'Alicante': 12,'Almeria': 6,'A
 votos=pd.read_csv('test_votos.csv',index_col=0)
 diputados=pd.read_csv('test_diputados.csv',squeeze=True,index_col=0)
 
+# Codificar
+
+## Provincias
+
+provincias=pd.Series(data=range(len(votos.index)),index=votos.index)
+votos.rename(provincias,inplace=True)
+diputados.rename(provincias,inplace=True)
+provincias.index=provincias.index.str.strip()
+
+## Partidos
+
+partidos=pd.Series(data=range(len(votos.columns)),index=votos.columns)
+votos.rename(columns=partidos,inplace=True)
+partidos.index=partidos.index.str.strip()
+
 ####################################################### NEW ELECTION DOWNLOAD ############################################################################
 
 def MIR():
