@@ -29,7 +29,12 @@ for prov in provincia:
 
 Diputados={'A Coruna': 8,'Alava': 4,'Albacete': 4,'Alicante': 12,'Almeria': 6,'Asturias': 7,'Avila': 3,'Badajoz': 6,'Barcelona': 32,'Bizkaia': 8,'Burgos': 4,'Caceres': 4,'Cadiz': 9,'Cantabria': 5,'Castellon': 5,'Ceuta': 1,'Ciudad Real': 5,'Cordoba': 6,'Cuenca': 3,'Gipuzkoa': 6,'Girona': 6,'Granada': 7,'Guadalajara': 3,'Huelva': 5,'Huesca': 3,'Illes Balears': 8,'Jaen': 5,'La Rioja': 4,'Las Palmas': 8,'Leon': 4,'Lleida': 4,'Lugo': 4,'Madrid': 37,'Malaga': 11,'Melilla': 1,'Murcia': 10,'Navarra': 5,'Oursense': 4,'Palencia': 3,'Pontevedra': 7,'Salamanca': 4,'Segovia': 3,'Sevilla': 12,'Soria': 2,'Tarragona': 6,'Tenerife': 7,'Teruel': 3,'Toledo': 6,'Valencia': 15,'Valladolid': 5,'Zamora': 3,'Zaragoza': 7}
 
-# NEW ELECTION DOWNLOAD
+############################################ Basic Data Set for testing (also method for from DataFrame) ###################################################
+
+votos=pd.read_csv('test_votos.csv',index_col=0)
+diputados=pd.read_csv('test_diputados.csv',squeeze=True,index_col=0)
+
+####################################################### NEW ELECTION DOWNLOAD ############################################################################
 
 def MIR():
     
@@ -166,13 +171,15 @@ def LimpiarDF(df):
     
     return partidos, provincias, votos, escanos
 
+######################################################################################################################################################
+
 # Funciones
 
 ## Calculador de Escaños
 
 def CalcularDiputados(Res,Dips):
     div=np.array([1/i for i in range(1,Dips+1)])
-    df=Res['Votos'].apply(lambda x: x*div).apply(pd.Series).unstack().sort_values(ascending=False)[:Dips]
+    df=Res.apply(lambda x: x*div).apply(pd.Series).unstack().sort_values(ascending=False)[:Dips]
     x=df.index.get_level_values(1).value_counts()
     return x
 
