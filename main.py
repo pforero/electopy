@@ -41,13 +41,13 @@ diputados=pd.read_csv('test_diputados.csv',squeeze=True,index_col=0)
 provincias=pd.Series(data=range(len(votos.index)),index=votos.index)
 votos.rename(provincias,inplace=True)
 diputados.rename(provincias,inplace=True)
-provincias.index=provincias.index.str.strip()
+provincias=pd.Series(data=provincias.index.str.strip(),index=provincias)
 
 ## Partidos
 
 partidos=pd.Series(data=range(len(votos.columns)),index=votos.columns)
 votos.rename(columns=partidos,inplace=True)
-partidos.index=partidos.index.str.strip()
+partidos=pd.Series(data=partidos.index.str.strip(),index=partidos)
 
 ####################################################### NEW ELECTION DOWNLOAD ############################################################################
 
@@ -193,47 +193,38 @@ def LimpiarDF(df):
 ## Calculador de Escaños
 
 def CalcularDiputados(Res,Dips):
+    
     div=np.array([1/i for i in range(1,Dips+1)])
     df=Res.apply(lambda x: x*div).apply(pd.Series).unstack().sort_values(ascending=False)[:Dips]
     x=df.index.get_level_values(1).value_counts()
+    
     return x
 
-## Calculador Parlamento
+## Composicion Parlmanetaria
 
-### Indice Partidos
+def Parlamento(Votos,Dip):
 
-def Partidos(Res):
-    ind=pd.Index(['PP'])
-    for prov in Res:
-        ind=ind.union(Res[prov].index)
-    return ind
+    df=Votos.apply(lambda x: CalcularDiputados(x,Dip.loc[x.name]),axis=1).replace(np.nan,0)
+    total=pd.DataFrame(data=df.sum(),columns=['Total'])
 
-### Composicion Parlmanetaria
-
-def Parlamento(Res):
-    Part=Partidos(Res)
-    df=pd.DataFrame(data=Res,index=Part,dtype=int).replace(np.nan,0)
-    return df.assign(Total=df.sum(axis=1))
+    return df.append(total.T)
 
 ## Partido mas Votado
 
-def MasVotado(Res,provincia):
-    df=pd.DataFrame(data=provincia,index=provincia)
-    for prov in provincia:
-        df.loc[prov]=Res[prov].sort_values(by='Votos',ascending=False).index[0]
-    return df
+def MasVotado(Votos):
+
+    mas_vot=Votos.apply(lambda x: x.sort_values(ascending=False).index[0],axis=1)
+
+    return mas_vot
 
 ## Elecciones
 
-def Elecciones(Provincia, Votos, Dip):
+def Elecciones(Votos, Dip):
     
     Elecciones={}
-    ResDip={}
-    for prov in Provincia:
-        ResDip[prov]=CalcularDiputados(Votos[prov],Diputados[prov])
-        
-    Elecciones['Parlamento']=Parlamento(ResDip)
-    Elecciones['Circunscripcion']=MasVotado(Votos,Provincia)
+
+    Elecciones['Parlamento']=Parlamento(Votos,Dip)
+    Elecciones['Circunscripcion']=MasVotado(Votos)
     Elecciones['Votos']=Votos
     
     return Elecciones
