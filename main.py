@@ -10,68 +10,68 @@ from matplotlib.colors import ListedColormap
 import geopandas as gpd
 import shapely
 
+import urllib.request
+import zipfile
+
 # Add Data
+
+############################################ Basic Data Set for testing (also method for from DataFrame) ###################################################
+
+votos=pd.read_csv('test_votos.csv',index_col=0,thousands=',')
+diputados=pd.read_csv('test_diputados.csv',squeeze=True,index_col=0)
+
+# Codificar
 
 ## Provincias
 
-provincia=['A Coruna','Alava','Albacete','Alicante','Almeria','Asturias','Avila','Badajoz','Barcelona','Bizkaia','Burgos','Caceres','Cadiz','Cantabria','Castellon','Ceuta','Ciudad Real','Cordoba','Cuenca','Gipuzkoa','Girona','Granada','Guadalajara','Huelva','Huesca','Illes Balears','Jaen','La Rioja','Las Palmas','Leon','Lleida','Lugo','Madrid','Malaga','Melilla','Murcia','Navarra','Oursense','Palencia','Pontevedra','Salamanca','Segovia','Sevilla','Soria','Tarragona','Tenerife','Teruel','Toledo','Valencia','Valladolid','Zamora','Zaragoza']
+provincias=pd.Series(data=range(len(votos.index)),index=votos.index)
+votos.rename(provincias,inplace=True)
+diputados.rename(provincias,inplace=True)
+provincias=pd.Series(data=provincias.index.str.strip(),index=provincias)
 
-## Resultados
+## Partidos
 
-Resultado={}
-for prov in provincia:
-    Resultado[prov]=pd.read_csv('Resultados/'+prov+'.csv',index_col=[0],usecols=['Candidaturas','Votos'])
-
-## Escaños
-
-Diputados={'A Coruna': 8,'Alava': 4,'Albacete': 4,'Alicante': 12,'Almeria': 6,'Asturias': 7,'Avila': 3,'Badajoz': 6,'Barcelona': 32,'Bizkaia': 8,'Burgos': 4,'Caceres': 4,'Cadiz': 9,'Cantabria': 5,'Castellon': 5,'Ceuta': 1,'Ciudad Real': 5,'Cordoba': 6,'Cuenca': 3,'Gipuzkoa': 6,'Girona': 6,'Granada': 7,'Guadalajara': 3,'Huelva': 5,'Huesca': 3,'Illes Balears': 8,'Jaen': 5,'La Rioja': 4,'Las Palmas': 8,'Leon': 4,'Lleida': 4,'Lugo': 4,'Madrid': 37,'Malaga': 11,'Melilla': 1,'Murcia': 10,'Navarra': 5,'Oursense': 4,'Palencia': 3,'Pontevedra': 7,'Salamanca': 4,'Segovia': 3,'Sevilla': 12,'Soria': 2,'Tarragona': 6,'Tenerife': 7,'Teruel': 3,'Toledo': 6,'Valencia': 15,'Valladolid': 5,'Zamora': 3,'Zaragoza': 7}
+partidos=pd.Series(data=range(len(votos.columns)),index=votos.columns)
+votos.rename(columns=partidos,inplace=True)
+partidos=pd.Series(data=partidos.index.str.strip(),index=partidos)
 
 # Funciones
 
 ## Calculador de Escaños
 
 def CalcularDiputados(Res,Dips):
+    
     div=np.array([1/i for i in range(1,Dips+1)])
-    df=Res['Votos'].apply(lambda x: x*div).apply(pd.Series).unstack().sort_values(ascending=False)[:Dips]
+    df=Res.apply(lambda x: x*div).apply(pd.Series).unstack().sort_values(ascending=False)[:Dips]
     x=df.index.get_level_values(1).value_counts()
+
     return x
 
-## Calculador Parlamento
+## Composicion Parlmanetaria
 
-### Indice Partidos
+def Parlamento(Votos,Dip):
 
-def Partidos(Res):
-    ind=pd.Index(['PP'])
-    for prov in Res:
-        ind=ind.union(Res[prov].index)
-    return ind
+    df=Votos.apply(lambda x: CalcularDiputados(x,Dip.loc[x.name]),axis=1).replace(np.nan,0)
+    total=pd.DataFrame(data=df.sum(),columns=['Total'])
 
-### Composicion Parlmanetaria
-
-def Parlamento(Res):
-    Part=Partidos(Res)
-    df=pd.DataFrame(data=Res,index=Part,dtype=int).replace(np.nan,0)
-    return df.assign(Total=df.sum(axis=1))
+    return df.append(total.T)
 
 ## Partido mas Votado
 
-def MasVotado(Res,provincia):
-    df=pd.DataFrame(data=provincia,index=provincia)
-    for prov in provincia:
-        df.loc[prov]=Res[prov].sort_values(by='Votos',ascending=False).index[0]
-    return df
+def MasVotado(Votos):
+
+    mas_vot=Votos.apply(lambda x: x.sort_values(ascending=False).index[0],axis=1)
+
+    return mas_vot
 
 ## Elecciones
 
-def Elecciones(Provincia, Votos, Dip):
+def Elecciones(Votos, Dip):
     
     Elecciones={}
-    ResDip={}
-    for prov in Provincia:
-        ResDip[prov]=CalcularDiputados(Votos[prov],Diputados[prov])
-        
-    Elecciones['Parlamento']=Parlamento(ResDip)
-    Elecciones['Circunscripcion']=MasVotado(Votos,Provincia)
+
+    Elecciones['Parlamento']=Parlamento(Votos,Dip)
+    Elecciones['Circunscripcion']=MasVotado(Votos)
     Elecciones['Votos']=Votos
     
     return Elecciones
@@ -84,22 +84,23 @@ def Elecciones(Provincia, Votos, Dip):
 def DicNombres():
     
     mapdict={
-    'CÃ¡ceres': 'Caceres',
-    'LÃ©rida': 'Lleida',
-    'Gerona': 'Girona',
-    'Orense': 'Oursense',
-    'CÃ¡diz': 'Cadiz',
-    'CastellÃ³n': 'Castellon',
-    'AlmerÃ­a': 'Almeria',
-    'MÃ¡laga': 'Malaga',
-    'La CoruÃ±a': 'A Coruna',
-    'Santa Cruz de Tenerife': 'Tenerife',
+    'CÃ¡ceres': 'Cáceres',
+    'Orense': 'Ourense',
+    'CÃ¡diz': 'Cádiz',
+    'CastellÃ³n': 'Castellón / Castelló',
+    'AlmerÃ­a': 'Almería',
+    'MÃ¡laga': 'Málaga',
+    'La CoruÃ±a': 'A Coruña',
+    'Ãlava': 'Araba - Álava',
+    'LeÃ³n': 'León',
+    'Ãvila': 'Ávila',
+    'CÃ³rdoba': 'Córdoba',
+    'JaÃ©n': 'Jaén',
+    'Alicante': 'Alicante / Alacant',
+    'Valencia':'Valencia / València',
     'Baleares': 'Illes Balears',
-    'Ãlava': 'Alava',
-    'LeÃ³n': 'Leon',
-    'Ãvila': 'Avila',
-    'CÃ³rdoba': 'Cordoba',
-    'JaÃ©n': 'Jaen'
+    'Gerona': 'Girona',
+    'LÃ©rida': 'Lleida'
     }
     
     return mapdict
@@ -140,7 +141,7 @@ def Mapa(Res,text=''):
     
     esp['prov']=esp['name'].replace(mapdict)
     
-    merge=esp.set_index('prov').join(Res['Circunscripcion'])
+    merge=esp.set_index('prov').join(pd.DataFrame(data=Res['Circunscripcion'].values,index=Res['Circunscripcion'].index.map(provincias)))
     
     colormap=CreateColorMap()
     
@@ -179,16 +180,25 @@ def CreateColors(Partidos):
         'PSOE':'#ED1C24',
         'PP': '#0055A7',
         'Cs': '#FA5000',
+        "C's": '#FA5000',
         'Podemos': '#6A2E68',
+        'PODEMOS-IU-EQUO': '#6A2E68',
+        'ECP': '#6A2E68',
+        'PODEMOS-EN MAREA-ANOVA-EU': '#6A2E68',
         'VOX': '#5AC035',
         'ERC': '#F3B217',
+        'ERC-CATSÍ': '#F3B217',
+        'CDC': '#C40048',
         'JxCAT': '#C40048',
         'PNV': '#009526',
+        'EAJ-PNV': '#009526',
         'EH Bildu': '#A3C940',
         'NA+': '#FFDA1A',
         'CC': '#E51C13',
+        'CCa-PNC': '#E51C13',
         'PRC': '#DB6426',
-        'COMPROMÍS': '#BECD48'
+        'COMPROMÍS': '#BECD48',
+        'PODEMOS-COMPROMÍS-EUPV': '#BECD48',
     }
     
     return Partidos.map(PartyColors).values
@@ -197,11 +207,11 @@ def CreateColors(Partidos):
 
 def Composicion(Res,text=''):
     
-    sortedparl=Res['Parlamento'].Total.sort_values(ascending=False)
+    sortedparl=Res['Parlamento'].loc['Total'].sort_values(ascending=False)
     
-    label=CreateLabels(sortedparl)
+    label=CreateLabels(sortedparl.rename(partidos))
     
-    colors=CreateColors(sortedparl.index)
+    colors=CreateColors(sortedparl.rename(partidos).index)
     
     plt.rcParams.update({'font.size':12})
 
@@ -215,28 +225,35 @@ def Composicion(Res,text=''):
 ## Nuevo Resultado
 
 def NuevoResultado(Res,Part1,Part2,Peso=1):
+    
     NRes=Res.copy()
-    if np.isin('NA+',NRes.index) & ((Part1=='PP') | (Part1=='Cs')):
-        Part1='NA+'
-    if np.isin(Part1,NRes.index) & np.isin(Part2,NRes.index):
-        NRes.loc[Part1]=NRes.loc[Part1]+(NRes.loc[Part2]*Peso)
-        NRes.loc[Part2]=NRes.loc[Part2]*(1-Peso)
+    NRes[Part1]=NRes[Part1]+NRes[Part2]*Peso
+    NRes[Part2]=NRes[Part2]*(1-Peso)
+    
     return NRes
 
 ## Nuevas Elecciones
 
-def NuevasElecciones(Provincia, Votos, Diputados, Partido1, Partido2, Peso=1):
+def NuevasElecciones(Votos, Diputados, Partido1, Partido2, Peso=1):
     
     NVotos={}
-    NVotos['Partido1']=Partido1
-    NVotos['Partido2']=Partido2
+    NVotos['Partido1']=partidos[partidos==Partido1].index[0]
+    NVotos['Partido2']=partidos[partidos==Partido2].index[0]
     NVotos['Peso']=Peso
-    for prov in Provincia:
-        NVotos[prov]=NuevoResultado(Votos[prov],Partido1, Partido2, Peso)
     
-    return Elecciones(Provincia, NVotos, Diputados)
+    NVotos['Votos']=NuevoResultado(Votos,NVotos['Partido1'],NVotos['Partido2'],Peso)
+    
+    return Elecciones(NVotos['Votos'], Diputados)
 
-# Diferencia
+    # Procedural Test
+
+Res1=Elecciones(votos,diputados)
+Res2=NuevasElecciones(votos,diputados,'PP','PSOE',1)
+Mapa(Res1)
+Composicion(Res2)
+
+############################################ Diferencia (Legacy) ##############################################################
+# Lo dejo como referencia. Pero hasta no crear todo nuevo, esto es demasiado complejo para tocarlo cada vez que cambiamos algo
 
 def Diferencia(Res,NRes):
     
@@ -290,11 +307,3 @@ def Diferencia(Res,NRes):
     for i in ind:
         ax.text(i+width*0.6,Opc2[Newid[i]]+5,'{:.0f}'.format(Opc2[Newid[i]]))
     plt.show()
-
-# Procedural Test
-
-Res1=Elecciones(provincia, Resultado, Diputados)
-Res2=NuevasElecciones(provincia, Resultado, Diputados, 'PP', 'VOX',1)
-Mapa(Res2)
-Composicion(Res2)
-Diferencia(Res1,Res2)
