@@ -15,23 +15,9 @@ import zipfile
 
 # Add Data
 
-## Provincias
-
-provincia=['A Coruna','Alava','Albacete','Alicante','Almeria','Asturias','Avila','Badajoz','Barcelona','Bizkaia','Burgos','Caceres','Cadiz','Cantabria','Castellon','Ceuta','Ciudad Real','Cordoba','Cuenca','Gipuzkoa','Girona','Granada','Guadalajara','Huelva','Huesca','Illes Balears','Jaen','La Rioja','Las Palmas','Leon','Lleida','Lugo','Madrid','Malaga','Melilla','Murcia','Navarra','Oursense','Palencia','Pontevedra','Salamanca','Segovia','Sevilla','Soria','Tarragona','Tenerife','Teruel','Toledo','Valencia','Valladolid','Zamora','Zaragoza']
-
-## Resultados
-
-Resultado={}
-for prov in provincia:
-    Resultado[prov]=pd.read_csv('Resultados/'+prov+'.csv',index_col=[0],usecols=['Candidaturas','Votos'])
-
-## Escaños
-
-Diputados={'A Coruna': 8,'Alava': 4,'Albacete': 4,'Alicante': 12,'Almeria': 6,'Asturias': 7,'Avila': 3,'Badajoz': 6,'Barcelona': 32,'Bizkaia': 8,'Burgos': 4,'Caceres': 4,'Cadiz': 9,'Cantabria': 5,'Castellon': 5,'Ceuta': 1,'Ciudad Real': 5,'Cordoba': 6,'Cuenca': 3,'Gipuzkoa': 6,'Girona': 6,'Granada': 7,'Guadalajara': 3,'Huelva': 5,'Huesca': 3,'Illes Balears': 8,'Jaen': 5,'La Rioja': 4,'Las Palmas': 8,'Leon': 4,'Lleida': 4,'Lugo': 4,'Madrid': 37,'Malaga': 11,'Melilla': 1,'Murcia': 10,'Navarra': 5,'Oursense': 4,'Palencia': 3,'Pontevedra': 7,'Salamanca': 4,'Segovia': 3,'Sevilla': 12,'Soria': 2,'Tarragona': 6,'Tenerife': 7,'Teruel': 3,'Toledo': 6,'Valencia': 15,'Valladolid': 5,'Zamora': 3,'Zaragoza': 7}
-
 ############################################ Basic Data Set for testing (also method for from DataFrame) ###################################################
 
-votos=pd.read_csv('test_votos.csv',index_col=0)
+votos=pd.read_csv('test_votos.csv',index_col=0,thousands=',')
 diputados=pd.read_csv('test_diputados.csv',squeeze=True,index_col=0)
 
 # Codificar
@@ -48,145 +34,6 @@ provincias=pd.Series(data=provincias.index.str.strip(),index=provincias)
 partidos=pd.Series(data=range(len(votos.columns)),index=votos.columns)
 votos.rename(columns=partidos,inplace=True)
 partidos=pd.Series(data=partidos.index.str.strip(),index=partidos)
-
-####################################################### NEW ELECTION DOWNLOAD ############################################################################
-
-def MIR():
-    
-    past_elections={2016:'PROV_02_201606_1.zip'}
-    
-    return past_elections
-
-def GetFileName(year=2016):
-    
-    past_elections=MIR()
-    
-    try:
-        filename=past_elections[year]
-    except:
-        filename=past_elections[2016]
-        
-    return filename
-
-def DescargarElecciones(year=2016,save_folder='New Results'):
-    
-    miraddress='http://www.infoelectoral.mir.es/infoelectoral/docxl/'
-    filename=GetFileName(year)
-        
-    url=miraddress+filename
-    location=save_folder+'/'+filename
-    urllib.request.urlretrieve(url, location)
-
-def GetFile_as_DF(file_name):
-    
-    if file_name.endswith('.zip'):
-        
-        end_file=file_name.rsplit('/')[-1][:-4]+'.xlsx'
-        archive = zipfile.ZipFile(file_name,'r')
-        xlsxfile = archive.open(end_file)
-        
-    else:
-        
-        xlsxfile = file_name
-        
-    return pd.read_excel(xlsxfile,skiprows=range(3))
-
-def CargarElecciones(file_name=None,year=2016,save_folder='New Results'):
-    
-    if file_name:
-        
-        try:
-            
-            GetFile_as_DF(file_name)
-            
-        except:
-            
-            print('File Not Found!')
-    else:
-        
-        past_elections=MIR()
-        file_name=save_folder+'/'+GetFileName(year)
-        
-        try:
-            
-            df=GetFile_as_DF(file_name)
-            
-        except:
-            
-            DescargarElecciones(year=year,save_folder=save_folder)
-            df=GetFile_as_DF(file_name)
-            
-    return df
-
-def LimpiarPartidos(df):
-    
-    Partidos=df.loc[0,(df.loc[1]=='Votos')]
-    Partidos.name='Partidos'
-    Partidos.index.name='Nombre Largo'
-    
-    return Partidos
-
-def LimpiarProvincias(df):
-    
-    colNombre=df.columns[df.loc[1]=='Nombre de Provincia']
-    colCodigo=df.columns[df.loc[1]=='Código de Provincia']
-    
-    prov=df.loc[2:,colNombre].iloc[:,0].str.strip()
-    prov.index=df.loc[2:,colCodigo].iloc[:,0]
-    prov.index.name='Codigo de Provincia'
-    
-    Provincias=prov
-    Provincias.name='Provincias'
-    
-    return Provincias
-
-def LimpiarVotos(df):
-    
-    Partidos=LimpiarPartidos(df)
-    colCodigo=df.columns[df.loc[1]=='Código de Provincia']
-    
-    Votos=df.loc[2:,(df.loc[1]=='Votos')]
-    Votos.columns=Partidos.values
-    Votos.columns.name='Partido'
-    
-    Votos=Votos.set_index(df.loc[2:,colCodigo].values.squeeze())
-    Votos.index.name='Codigo de Provincia'
-    Votos.name='Votos'
-    
-    return Votos
-
-def LimpiarDiputados(df):
-    
-    Partidos=LimpiarPartidos(df)
-    colCodigo=df.columns[df.loc[1]=='Código de Provincia']
-    
-    Votos=df.loc[2:,(df.loc[1]=='Diputados')]
-    Votos.columns=Partidos.values
-    Votos.columns.name='Partido'
-    
-    Votos=Votos.set_index(df.loc[2:,colCodigo].values.squeeze())
-    Votos.index.name='Codigo de Provincia'
-    Votos.name='Diputados'
-    
-    return Votos
-
-def DistribucionEscanos(diputados):
-    
-    escanos = diputados.loc[:,Partidos].sum(axis=1)
-    
-    return escanos
-
-def LimpiarDF(df):
-    
-    partidos = LimpiarPartidos(df)
-    provincias = LimpiarProvincias(df)
-    votos = LimpiarVotos(df)
-    diputados = LimpiarDiputados(df)
-    escanos = DistribucionEscanos(diputados)
-    
-    return partidos, provincias, votos, escanos
-
-######################################################################################################################################################
 
 # Funciones
 
@@ -373,6 +220,14 @@ def Composicion(Res,text=''):
     plt.title('Composicion del Parlamento'+text,fontdict={'fontsize':32})
     plt.show()
 
+# Procedural Test
+
+Res1=Elecciones(votos,diputados)
+Mapa(Res1)
+Composicion(Res1)
+
+######################################### WORK IN PROGRESS ####### DOES NOT WORK ####################################################################
+
 # Cambio Electoral
 
 ## Nuevo Resultado
@@ -453,11 +308,3 @@ def Diferencia(Res,NRes):
     for i in ind:
         ax.text(i+width*0.6,Opc2[Newid[i]]+5,'{:.0f}'.format(Opc2[Newid[i]]))
     plt.show()
-
-# Procedural Test
-
-Res1=Elecciones(provincia, Resultado, Diputados)
-Res2=NuevasElecciones(provincia, Resultado, Diputados, 'PP', 'VOX',1)
-Mapa(Res2)
-Composicion(Res2)
-Diferencia(Res1,Res2)
