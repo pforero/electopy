@@ -16,24 +16,160 @@ import zipfile
 # Add Data
 
 ############################################ Basic Data Set for testing (also method for from DataFrame) ###################################################
+#
+#votos=pd.read_csv('test_votos.csv',index_col=0,thousands=',')
+#diputados=pd.read_csv('test_diputados.csv',squeeze=True,index_col=0)
+#
+## Codificar
+#
+### Provincias
+#
+#provincias=pd.Series(data=range(len(votos.index)),index=votos.index)
+#votos.rename(provincias,inplace=True)
+#diputados.rename(provincias,inplace=True)
+#provincias=pd.Series(data=provincias.index.str.strip(),index=provincias)
+#
+### Partidos
+#
+#partidos=pd.Series(data=range(len(votos.columns)),index=votos.columns)
+#votos.rename(columns=partidos,inplace=True)
+#partidos=pd.Series(data=partidos.index.str.strip(),index=partidos)
+#
+####################################################### NEW ELECTION DOWNLOAD ############################################################################
 
-votos=pd.read_csv('test_votos.csv',index_col=0,thousands=',')
-diputados=pd.read_csv('test_diputados.csv',squeeze=True,index_col=0)
+def MIR():
+    
+    past_elections={2016:'PROV_02_201606_1.zip'}
+    
+    return past_elections
 
-# Codificar
+def GetFileName(year=2016):
+    
+    past_elections=MIR()
+    
+    try:
+        filename=past_elections[year]
+    except:
+        filename=past_elections[2016]
+        
+    return filename
 
-## Provincias
+def DescargarElecciones(year=2016,save_folder='New Results'):
+    
+    miraddress='http://www.infoelectoral.mir.es/infoelectoral/docxl/'
+    filename=GetFileName(year)
+        
+    url=miraddress+filename
+    location=save_folder+'/'+filename
+    urllib.request.urlretrieve(url, location)
 
-provincias=pd.Series(data=range(len(votos.index)),index=votos.index)
-votos.rename(provincias,inplace=True)
-diputados.rename(provincias,inplace=True)
-provincias=pd.Series(data=provincias.index.str.strip(),index=provincias)
+def GetFile_as_DF(file_name):
+    
+    if file_name.endswith('.zip'):
+        
+        end_file=file_name.rsplit('/')[-1][:-4]+'.xlsx'
+        archive = zipfile.ZipFile(file_name,'r')
+        xlsxfile = archive.open(end_file)
+        
+    else:
+        
+        xlsxfile = file_name
+        
+    return pd.read_excel(xlsxfile,skiprows=range(3))
 
-## Partidos
+def CargarElecciones(file_name=None,year=2016,save_folder='New Results'):
+    
+    if file_name:
+        
+        try:
+            
+            GetFile_as_DF(file_name)
+            
+        except:
+            
+            print('File Not Found!')
+    else:
+        
+        past_elections=MIR()
+        file_name=save_folder+'/'+GetFileName(year)
+        
+        try:
+            
+            df=GetFile_as_DF(file_name)
+            
+        except:
+            
+            DescargarElecciones(year=year,save_folder=save_folder)
+            df=GetFile_as_DF(file_name)
+            
+    return df
 
-partidos=pd.Series(data=range(len(votos.columns)),index=votos.columns)
-votos.rename(columns=partidos,inplace=True)
-partidos=pd.Series(data=partidos.index.str.strip(),index=partidos)
+def LimpiarPartidos(df):
+    
+    Partidos=df.loc[0,(df.loc[1]=='Votos')].str.strip()
+    Partidos.index=range(len(Partidos))
+    Partidos.name='Partidos'
+    
+    return Partidos
+
+def LimpiarProvincias(df):
+    
+    colNombre=df.columns[df.loc[1]=='Nombre de Provincia']
+    colCodigo=df.columns[df.loc[1]=='Código de Provincia']
+    
+    prov=df.loc[2:,colNombre].iloc[:,0].str.strip()
+    prov.index=df.loc[2:,colCodigo].iloc[:,0]
+    prov.index.name=None
+    
+    Provincias=prov
+    Provincias.name='Provincias'
+    
+    return Provincias
+
+def LimpiarVotos(df):
+    
+    Partidos=LimpiarPartidos(df)
+    colCodigo=df.columns[df.loc[1]=='Código de Provincia']
+    
+    Votos=df.loc[2:,(df.loc[1]=='Votos')]
+    Votos.columns=Partidos.index
+
+    Votos=Votos.set_index(df.loc[2:,colCodigo].values.squeeze())
+    
+    return Votos
+
+def LimpiarDiputados(df):
+    
+    Partidos=LimpiarPartidos(df)
+    colCodigo=df.columns[df.loc[1]=='Código de Provincia']
+    
+    Votos=df.loc[2:,(df.loc[1]=='Diputados')]
+    Votos.columns=Partidos.index
+    
+    Votos=Votos.set_index(df.loc[2:,colCodigo].values.squeeze())
+    
+    return Votos
+
+def DistribucionEscanos(diputados):
+    
+    escanos = diputados.sum(axis=1)
+    
+    return escanos.astype(int)
+
+def LimpiarDF(df):
+    
+    partidos = LimpiarPartidos(df)
+    provincias = LimpiarProvincias(df)
+    votos = LimpiarVotos(df)
+    diputados = LimpiarDiputados(df)
+    escanos = DistribucionEscanos(diputados)
+    
+    return partidos, provincias, votos, escanos
+
+df=CargarElecciones()
+partidos, provincias, votos, diputados = LimpiarDF(df) 
+
+######################################################################################################################################################
 
 # Funciones
 
