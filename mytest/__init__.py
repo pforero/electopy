@@ -29,8 +29,7 @@ def ziptest():
 
     # Cargar Elecciones
 
-    df=electopy.CargarElecciones()
-    partidos, provincias, votos, diputados = electopy.LimpiarDF(df) 
+    partidos, provincias, votos, diputados = electopy.from_mir(2016) 
 
     # Test
 
