@@ -1,6 +1,7 @@
-import pandas as pd
 import electopy
-
+import electopy.electoral_map
+import electopy.election
+import pandas as pd
 
 # CSV Test
 
@@ -18,23 +19,18 @@ def csvtest():
     votos.rename(columns=partidos,inplace=True)
     partidos=pd.Series(data=partidos.index.str.strip(),index=partidos)
 
-    Res1=electopy.Elecciones(votos,diputados)
-    Res2=electopy.NuevasElecciones(votos,diputados,'PP','PSOE', partidos, 1)
-    electopy.Mapa(Res1,provincias)
-    electopy.Composicion(Res2, partidos)
+    em = electopy.electoral_map.electoral_map(partidos,provincias,diputados)
+    el = electopy.election.election(em,votos)
+    el2 = el.transform(0,1)
+    el.spain_map()
+    el2.parlament_composition()
 
 ## ZIP Test
 
 def ziptest():
 
-    # Cargar Elecciones
+    el = electopy.from_mir()
+    el2 = el.transform(0,1)
 
-    df=electopy.CargarElecciones()
-    partidos, provincias, votos, diputados = electopy.LimpiarDF(df) 
-
-    # Test
-
-    Res1=electopy.Elecciones(votos,diputados)
-    Res2=electopy.NuevasElecciones(votos,diputados,'PP','PSOE', partidos, 1)
-    electopy.Mapa(Res1,provincias)
-    electopy.Composicion(Res2, partidos)
+    el.spain_map()
+    el2.parlament_composition()
