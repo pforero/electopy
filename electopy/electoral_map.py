@@ -6,10 +6,12 @@ class electoral_map:
         self.regions = regions
         self.distribution = distribution
 
-        self.total_mps = self.sum_mps(self.distribution)
+        self.total_mps = sum_mps(distribution)
 
-    def sum_mps(self,distribution):
+##################################### Helper Functions #######################################
 
-        total = distribution.sum()
+def sum_mps(distribution):
 
-        return total
+    total = distribution.sum()
+
+    return total

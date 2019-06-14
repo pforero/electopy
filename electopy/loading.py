@@ -77,7 +77,7 @@ def load_election(file_name=None,year=2016,save_folder='past_elections'):
 
             df = file_to_df(file_name)
             
-    return df
+        return df
 
 def get_parties(df):
     
