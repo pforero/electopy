@@ -7,9 +7,6 @@ from matplotlib.colors import to_hex
 
 import shapely
 
-# Mapa
-
-## Diccionario Nombres
 def correct_region_names():
     
     mapdict={
@@ -36,40 +33,71 @@ def correct_region_names():
 
 ## Mover Canarias
 
-def move_canary(Geo,x=7,y=5):
+def move_canary(geo,x=7,y=5):
 
     # This function currently brings out a warning. Find a better way to do it without warnings
     
-    for i in Geo.loc[Geo['adm0_sr']==3].index:
-        Geo['geometry'].loc[i]=shapely.affinity.translate(Geo['geometry'].loc[i], xoff=x, yoff=y)
+    for i in geo.loc[geo['adm0_sr']==3].index:
+
+        geo['geometry'].loc[i] = shapely.affinity.translate(geo['geometry'].loc[i], xoff=x, yoff=y)
     
-    return Geo
+    return geo
 
-# Parlamento
-
-## Create Labels
-
-def create_labels(Parl,Limite=6):
+def create_labels(Parl,limit=6):
     
     label=list(Parl.index)
     
     for i,v in enumerate(label):
-        if Parl[v]<Limite:
+
+        if Parl[v]<limit:
+
             label[i]=''
     
     return label
 
-## Display Escaños
+def display(pct):
 
-def disp(pct):
     if pct>1.5:
-        return '{:.0f}'.format(pct*3.5)
 
-## Create Colors
+        return '{:.0f}'.format(pct*3.5)
 
 def create_colors(parties):
     
-    PartyColors={
+    partycolors = party_colors()
+
+    colormap = np.vectorize(partycolors.get)(parties)
+    
+    missing = np.sum(colormap=='None')
+
+    if missing>10:
+
+        extracolors = cm.get_cmap('tab20',20)(np.linspace(0,1,20))
+
+    else: 
+            
+        extracolors = cm.get_cmap('tab10',10)(np.linspace(0,1,10)) 
+
+    i = 0
+    cmap=[]
+
+    for party in parties:
+
+        try: 
+                    
+                c = partycolors[party]
+
+        except:
+
+                c = extracolors[i]
+                i += 1
+
+        cmap.append(c)
+    
+    return cmap
+
+def party_colors():
+    
+    pc={
         'PSOE':'#ED1C24',
         'PP': '#0055A7',
         'Cs': '#FA5000',
@@ -94,35 +122,4 @@ def create_colors(parties):
         'PODEMOS-COMPROMÍS-EUPV': '#BECD48',
     }
 
-    colormap = np.vectorize(PartyColors.get)(parties)
-    
-    missing = colormap=='None'
-
-    missing_parties = parties[missing]
-
-    if len(missing_parties)>10:
-
-        extracolors = cm.get_cmap('tab20',20)(np.linspace(0,1,20))
-
-    else: 
-            
-        extracolors = cm.get_cmap('tab10',10)(np.linspace(0,1,10)) 
-
-    i = 0
-
-    cmap=[]
-
-    for party in parties:
-
-        try: 
-                    
-                c = PartyColors[party]
-
-        except:
-
-                c = extracolors[i]
-                i += 1
-
-        cmap.append(c)
-    
-    return cmap
+    return pc

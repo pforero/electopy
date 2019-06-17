@@ -81,11 +81,10 @@ class election:
 
         colormap=ListedColormap(electopy.display.create_colors(self.most_voted().map(self.parties).unique()))
 
-        # Nicer formatting needed. Map colours need to match political parties. Parties names need to be names, not codes
+        #plt.rcParams.update({'font.size':32})
 
-        plt.rcParams.update({'font.size':32})
-
-        ax=merge.plot(column=0,cmap=colormap,figsize=(31,19),linewidth=0.8,edgecolor='0.8',legend=True,categorical=True)
+        #plt.figure(figsize=(31,19))
+        ax=merge.plot(column=0,cmap=colormap,linewidth=0.8,edgecolor='0.8',legend=True,categorical=True)
         ax.set_axis_off()
         ax.set_title('Ganador por Circunscripcion'+text)
         plt.show()
@@ -98,10 +97,10 @@ class election:
 
         colors=electopy.display.create_colors(sortedparl.rename(self.parties).index)
 
-        plt.rcParams.update({'font.size':12})
+        #plt.rcParams.update({'font.size':12})
 
-        plt.figure(figsize=(10,10))
-        plt.pie(sortedparl,colors=colors,wedgeprops=dict(width=0.5),startangle=90,labels=label,autopct=lambda x: electopy.display.disp(x),pctdistance=0.75,textprops={'fontsize':'large','weight':'bold'})
+        #plt.figure(figsize=(10,10))
+        plt.pie(sortedparl,colors=colors,wedgeprops=dict(width=0.5),startangle=90,labels=label,autopct=lambda x: electopy.display.display(x),pctdistance=0.75,textprops={'fontsize':'large','weight':'bold'})
         plt.title('Composicion del Parlamento'+text,fontdict={'fontsize':32})
         plt.show()
 
