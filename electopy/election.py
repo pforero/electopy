@@ -1,5 +1,6 @@
 import electopy
 import electopy.display
+from electopy.electoral_map import electoral_map
 
 import pandas as pd
 import numpy as np
@@ -12,7 +13,11 @@ class election:
 
     def __init__(self,em,votes):
 
-        # Check if em is an electoral map
+        # Need a way to check that the coding for parties/regions match the index and columns of votes
+
+        if not isinstance(em,electoral_map):
+
+            raise ValueError('Not an Electoral Map: em is not of class electoral_map')
 
         self.em = em
         self.votes = votes
@@ -20,8 +25,6 @@ class election:
         self.parties = em.parties
         self.regions = em.regions
         self.distribution = em.distribution
-
-        # Need a way to check that the coding for parties/regions match the index and columns of votes
 
     def mps(self,region):
 
@@ -38,8 +41,6 @@ class election:
         return x
 
     def parlament(self):
-
-        # Parlament should be election.mps() (ie, when you calculate mps without specifying a party or region)
 
         df = self.votes.apply(lambda x: self.mps(x.name),axis=1).replace(np.nan,0)
 
@@ -93,7 +94,7 @@ class election:
         plt.rcParams.update({'font.size':12})
 
         plt.figure(figsize=(10,10))
-        plt.pie(sortedparl,colors=colors,wedgeprops=dict(width=0.5),startangle=90,labels=label,autopct=lambda x: electopy.display.disp(x),pctdistance=0.75,textprops={'fontsize':'large','weight':'bold'})
+        plt.pie(sortedparl,wedgeprops=dict(width=0.5),startangle=90,labels=label,autopct=lambda x: electopy.display.disp(x),pctdistance=0.75,textprops={'fontsize':'large','weight':'bold'})
         plt.title('Composicion del Parlamento'+text,fontdict={'fontsize':32})
         plt.show()
 
@@ -104,7 +105,7 @@ class election:
 
         new_votes=new_result(self.votes, party1 ,party2 ,weight)
 
-        new_election=electopy.election.election(self.em,new_votes)
+        new_election=electopy.election(self.em,new_votes)
 
         return new_election
 
