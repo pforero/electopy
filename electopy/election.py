@@ -93,7 +93,7 @@ class election:
         plt.rcParams.update({'font.size':12})
 
         plt.figure(figsize=(10,10))
-        plt.pie(sortedparl,colors=colors,wedgeprops=dict(width=0.5),startangle=90,labels=label,autopct=lambda x: electopy.display.disp(x),pctdistance=0.75,textprops={'fontsize':'large','weight':'bold'})
+        plt.pie(sortedparl,wedgeprops=dict(width=0.5),startangle=90,labels=label,autopct=lambda x: electopy.display.disp(x),pctdistance=0.75,textprops={'fontsize':'large','weight':'bold'})
         plt.title('Composicion del Parlamento'+text,fontdict={'fontsize':32})
         plt.show()
 

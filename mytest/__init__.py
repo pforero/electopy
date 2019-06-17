@@ -12,15 +12,15 @@ def csvtest():
 
     el = electopy.from_df(votos,diputados)
     el2 = el.transform(0,1)
-    
+
     el.spain_map()
     el2.parlament_composition()
 
 ## ZIP Test
 
-def ziptest():
+def ziptest(year=2016):
 
-    el = electopy.from_mir()
+    el = electopy.from_mir(year)
     el2 = el.transform(0,1)
 
     el.spain_map()

@@ -6,7 +6,20 @@ import zipfile
 
 def mir_dict():
     
-    election_dictionary = {2016:'PROV_02_201606_1.zip'}
+    election_dictionary = { 2016:'PROV_02_201606_1.zip',
+                            2015:'PROV_02_201512_1.zip',
+                            2011:'PROV_02_201111_1.zip',
+                            2008:'PROV_02_200803_1.zip',
+                            2004:'PROV_02_200403_1.zip',
+                            2000:'PROV_02_200003_1.zip',
+                            1996:'PROV_02_199603_1.zip',
+                            1993:'PROV_02_199306_1.zip',
+                            1989:'PROV_02_198910_1.zip',
+                            1986:'PROV_02_198606_1.zip',
+                            1982:'PROV_02_198210_1.zip',
+                            1979:'PROV_02_197903_1.zip',
+                            1977:'PROV_02_197706_1.zip'
+                            }
     
     return election_dictionary
 
@@ -48,7 +61,9 @@ def file_to_df(file_name):
         
         excel_file = file_name
         
-    df = pd.read_excel(excel_file,skiprows=range(3))
+    # nrows=54 works because the number of regions is the same for all elections. If there were any changes it wouldn't work
+
+    df = pd.read_excel(excel_file,skiprows=range(3),nrows=54)
 
     return df
 
