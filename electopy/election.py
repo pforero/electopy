@@ -13,11 +13,17 @@ class election:
 
     def __init__(self,em,votes):
 
-        # Need a way to check that the coding for parties/regions match the index and columns of votes
-
         if not isinstance(em,electoral_map):
 
             raise ValueError('Not an Electoral Map: em is not of class electoral_map')
+
+        if not votes.columns.equals(em.parties.index):
+
+            raise ValueError('votes columns do not match the parties of the electoral map')
+
+        if not votes.index.equals(em.regions.index):
+
+            raise ValueError('votes index does not match the regions of the electoral map')
 
         self.em = em
         self.votes = votes
