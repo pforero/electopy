@@ -6,6 +6,7 @@ import pandas as pd
 import numpy as np
 
 import matplotlib.pyplot as plt
+from matplotlib.colors import ListedColormap
 
 import geopandas as gpd
 
@@ -78,7 +79,7 @@ class election:
 
         merge=esp.set_index('prov').join(pd.DataFrame(data=self.most_voted().values,index=self.most_voted().index.map(self.regions)))
 
-        colormap=electopy.display.color_map()
+        colormap=ListedColormap(electopy.display.create_colors(self.most_voted().map(self.parties).unique()))
 
         # Nicer formatting needed. Map colours need to match political parties. Parties names need to be names, not codes
 
@@ -100,7 +101,7 @@ class election:
         plt.rcParams.update({'font.size':12})
 
         plt.figure(figsize=(10,10))
-        plt.pie(sortedparl,wedgeprops=dict(width=0.5),startangle=90,labels=label,autopct=lambda x: electopy.display.disp(x),pctdistance=0.75,textprops={'fontsize':'large','weight':'bold'})
+        plt.pie(sortedparl,colors=colors,wedgeprops=dict(width=0.5),startangle=90,labels=label,autopct=lambda x: electopy.display.disp(x),pctdistance=0.75,textprops={'fontsize':'large','weight':'bold'})
         plt.title('Composicion del Parlamento'+text,fontdict={'fontsize':32})
         plt.show()
 

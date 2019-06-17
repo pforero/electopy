@@ -3,7 +3,7 @@ import electopy.display
 import numpy as np
 
 from matplotlib import cm
-from matplotlib.colors import ListedColormap
+from matplotlib.colors import to_hex
 
 import shapely
 
@@ -33,20 +33,6 @@ def correct_region_names():
     }
     
     return mapdict
-
-## Color Map
-
-def color_map():
-    
-    colormap=cm.get_cmap('Blues',5)(np.linspace(0,1,5))
-    
-    colormap[0]=[243/256,178/256,23/256,1]
-    colormap[1]=[201/256,28/256,41/256,1]
-    colormap[2]=[0/256,149/256,38/256,1]
-    colormap[3]=[0/256,85/256,167/256,1]
-    colormap[4]=[237/256,28/256,36/256,1]
-    
-    return ListedColormap(colormap)
 
 ## Mover Canarias
 
@@ -81,7 +67,7 @@ def disp(pct):
 
 ## Create Colors
 
-def create_colors(Partidos):
+def create_colors(parties):
     
     PartyColors={
         'PSOE':'#ED1C24',
@@ -107,5 +93,36 @@ def create_colors(Partidos):
         'COMPROMÍS': '#BECD48',
         'PODEMOS-COMPROMÍS-EUPV': '#BECD48',
     }
+
+    colormap = np.vectorize(PartyColors.get)(parties)
     
-    return Partidos.map(PartyColors).values
+    missing = colormap=='None'
+
+    missing_parties = parties[missing]
+
+    if len(missing_parties)>10:
+
+        extracolors = cm.get_cmap('tab20',20)(np.linspace(0,1,20))
+
+    else: 
+            
+        extracolors = cm.get_cmap('tab10',10)(np.linspace(0,1,10)) 
+
+    i = 0
+
+    cmap=[]
+
+    for party in parties:
+
+        try: 
+                    
+                c = PartyColors[party]
+
+        except:
+
+                c = extracolors[i]
+                i += 1
+
+        cmap.append(c)
+    
+    return cmap
