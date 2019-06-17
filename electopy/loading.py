@@ -131,7 +131,7 @@ def distribution_of_mps(mps):
     
     return distribution
 
-def clean_df(df):
+def clean_mir(df):
     
     parties = get_parties(df)
     regions = get_voting_regions(df)
@@ -139,4 +139,17 @@ def clean_df(df):
     mps = get_mps(df)
     distribution = distribution_of_mps(mps)
     
+    return parties, regions, votes, distribution
+
+def clean_df(votes,distribution):
+
+    regions = pd.Series(data=range(len(votes.index)),index=votes.index)
+    votes.rename(regions,inplace=True)
+    distribution.rename(regions,inplace=True)
+    regions = pd.Series(data=regions.index.str.strip(),index=regions)
+
+    parties = pd.Series(data=range(len(votes.columns)),index=votes.columns)
+    votes.rename(columns=parties,inplace=True)
+    parties = pd.Series(data=parties.index.str.strip(),index=parties)
+
     return parties, regions, votes, distribution
