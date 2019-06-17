@@ -50,7 +50,7 @@ def color_map():
 
 ## Mover Canarias
 
-def move_canary(Geo,x=0,y=0):
+def move_canary(Geo,x=7,y=5):
 
     # This function currently brings out a warning. Find a better way to do it without warnings
     

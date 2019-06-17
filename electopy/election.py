@@ -73,7 +73,7 @@ class election:
 
         mapdict=electopy.display.correct_region_names()
 
-        # This line brings out a slicing warrning. Find a better way fo doing it that does not bring a warning
+        # This line brings out a slicing warning. Find a better way fo doing it that does not bring a warning
         esp['prov']=esp['name'].replace(mapdict)
 
         merge=esp.set_index('prov').join(pd.DataFrame(data=self.most_voted().values,index=self.most_voted().index.map(self.regions)))
