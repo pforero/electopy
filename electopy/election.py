@@ -1,3 +1,4 @@
+import electopy
 import electopy.display
 
 import pandas as pd
@@ -106,6 +107,14 @@ class election:
         new_election=electopy.election.election(self.em,new_votes)
 
         return new_election
+
+    def compare(self, el2):
+
+        el = election(self.em,self.votes)
+
+        electopy.compare(el, el2)
+
+######################################### Helper Functions ######################################################################
 
 def new_result(votes,party1,party2,weight=1):
     

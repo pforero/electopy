@@ -20,3 +20,9 @@ def from_mir(year=2016):
     el = electopy.election.election(em,votes)
 
     return el
+
+def compare(el1,el2):
+
+    # Need to check that bot el1 and el2 are type election, and have the same electoral map
+
+    print('Needs to be done')
