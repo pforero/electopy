@@ -5,7 +5,6 @@ from electopy.electoral_map import electoral_map
 import pandas as pd
 import numpy as np
 
-import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
 
 class election:
@@ -110,3 +109,5 @@ def new_result(votes,party1,party2,weight=1):
     votes[party2] = votes[party2]*(1-weight)
     
     return votes
+
+## cSpell: ignore astype
