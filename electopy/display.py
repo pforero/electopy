@@ -100,12 +100,12 @@ def create_colors(parties):
 
         try: 
                     
-                c = partycolors[party]
+            c = partycolors[party]
 
         except:
 
-                c = extracolors[i]
-                i += 1
+            c = extracolors[i]
+            i += 1
 
         cmap.append(c)
     
@@ -142,7 +142,7 @@ def party_colors():
 
 def create_map_plot(merge,colormap,text):
 
-    ax = merge.plot(column=0, cmap=colormap, linewidth=0.8, edgecolor='0.8', legend=True, categorical=True)
+    ax = merge.plot(column=0, cmap=colormap, linewidth=0.8, edgecolor='0.8', legend=True, categorical=True, legend_kwds={'loc':'lower right'})
     ax.set_axis_off()
     ax.set_title('Winner by region: '+text)
 

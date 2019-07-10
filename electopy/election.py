@@ -65,11 +65,11 @@ class election:
 
         esp = electopy.display.proper_names(esp)
 
-        results = pd.DataFrame(data=self.most_voted().values,index=self.most_voted().index.map(self.regions))
+        results = pd.DataFrame(data=self.most_voted().map(self.parties).values,index=self.most_voted().index.map(self.regions))
 
         merge = esp.join(results)
 
-        colormap = ListedColormap(electopy.display.create_colors(self.most_voted().map(self.parties).unique()))
+        colormap = ListedColormap(electopy.display.create_colors(self.most_voted().map(self.parties).sort_values().unique()))
 
         electopy.display.create_map_plot(merge,colormap,text)
 
@@ -88,9 +88,9 @@ class election:
         # Needs to find a new way to do (and store parameters) transformations
         # Use party names, not party codes
 
-        new_votes=new_result(self.votes, party1 ,party2 ,weight)
+        new_votes = new_result(self.votes, party1 ,party2 ,weight)
 
-        new_election=electopy.election(self.em,new_votes)
+        new_election = electopy.election(self.em,new_votes)
 
         return new_election
 
@@ -104,7 +104,7 @@ class election:
 
 def new_result(votes,party1,party2,weight=1):
     
-    votes[party1]=votes[party1]+votes[party2]*weight
-    votes[party2]=votes[party2]*(1-weight)
+    votes[party1] = votes[party1]+votes[party2]*weight
+    votes[party2] = votes[party2]*(1-weight)
     
     return votes
