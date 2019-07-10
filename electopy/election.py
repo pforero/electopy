@@ -67,24 +67,23 @@ class election:
 
         # Most of this should be divided into sub functions for easier readability
 
-        map_df=gpd.read_file('map/ne_10m_admin_1_states_provinces.shp')
-        spa=map_df.loc[map_df['iso_a2']=='ES']
+        map_df = gpd.read_file('map/ne_10m_admin_1_states_provinces.shp')
+        spa = map_df.loc[map_df['iso_a2']=='ES']
 
-        esp=electopy.display.move_canary(spa)
+        esp = electopy.display.move_canary(spa)
 
-        mapdict=electopy.display.correct_region_names()
+        mapdict = electopy.display.correct_region_names()
 
-        # This line brings out a slicing warning. Find a better way fo doing it that does not bring a warning
-        esp['prov']=esp['name'].replace(mapdict)
+        esp = esp.assign(prov = esp['name'].replace(mapdict))
 
-        merge=esp.set_index('prov').join(pd.DataFrame(data=self.most_voted().values,index=self.most_voted().index.map(self.regions)))
+        merge = esp.set_index('prov').join(pd.DataFrame(data=self.most_voted().values,index=self.most_voted().index.map(self.regions)))
 
-        colormap=ListedColormap(electopy.display.create_colors(self.most_voted().map(self.parties).unique()))
+        colormap = ListedColormap(electopy.display.create_colors(self.most_voted().map(self.parties).unique()))
 
         #plt.rcParams.update({'font.size':32})
 
         #plt.figure(figsize=(31,19))
-        ax=merge.plot(column=0,cmap=colormap,linewidth=0.8,edgecolor='0.8',legend=True,categorical=True)
+        ax = merge.plot(column=0,cmap=colormap,linewidth=0.8,edgecolor='0.8',legend=True,categorical=True)
         ax.set_axis_off()
         ax.set_title('Ganador por Circunscripcion'+text)
         plt.show()
