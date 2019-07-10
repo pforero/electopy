@@ -34,22 +34,18 @@ def correct_region_names():
 ## Mover Canarias
 
 def move_canary(geo,x=7,y=5):
-
-    # This function currently brings out a warning. Find a better way to do it without warnings
     
-    for i in geo.loc[geo['adm0_sr']==3].index:
-
-        geo['geometry'].loc[i] = shapely.affinity.translate(geo['geometry'].loc[i], xoff=x, yoff=y)
+    geo.loc[Geo['adm0_sr']==3,'geometry']=geo.loc[geo['adm0_sr']==3,'geometry'].apply(lambda n: shapely.affinity.translate(n,xoff=x,yoff=y))
     
     return geo
 
-def create_labels(Parl,limit=6):
+def create_labels(parl,limit=6):
     
-    label=list(Parl.index)
+    label=list(parl.index)
     
     for i,v in enumerate(label):
 
-        if Parl[v]<limit:
+        if parl[v]<limit:
 
             label[i]=''
     
