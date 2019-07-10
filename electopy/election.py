@@ -86,9 +86,11 @@ class election:
     def transform(self, party1, party2, weight=1):
 
         # Needs to find a new way to do (and store parameters) transformations
-        # Use party names, not party codes
 
-        new_votes = new_result(self.votes, party1 ,party2 ,weight)
+        party_code_1 = self.parties[self.parties==party1].index[0]
+        party_code_2 = self.parties[self.parties==party2].index[0]
+
+        new_votes = new_result(self.votes, party_code_1 ,party_code_2 ,weight)
 
         new_election = electopy.election(self.em,new_votes)
 

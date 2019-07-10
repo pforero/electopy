@@ -11,7 +11,7 @@ def csvtest():
     diputados=pd.read_csv('mytest/test_diputados.csv',squeeze=True,index_col=0)
 
     el = electopy.from_df(votos,diputados)
-    el2 = el.transform(0,1)
+    el2 = el.transform('PSOE','PP')
 
     el.spain_map()
     el2.parlament_composition()
@@ -21,7 +21,7 @@ def csvtest():
 def ziptest(year=2016):
 
     el = electopy.from_mir(year)
-    el2 = el.transform(0,1)
+    el2 = el.transform('PP','PSOE')
 
     el.spain_map()
     el2.parlament_composition()
