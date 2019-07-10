@@ -27,6 +27,8 @@ def move_canary(geo,x=0,y=0):
     
     return geo
 
+## cSpell: disable
+
 def correct_region_names():
     
     mapdict={
@@ -50,6 +52,8 @@ def correct_region_names():
     }
     
     return mapdict
+
+## cSpell: enable
 
 def proper_names(esp):
 
@@ -111,6 +115,8 @@ def create_colors(parties):
     
     return cmap
 
+## cSpell: disable
+
 def party_colors():
     
     pc={
@@ -140,6 +146,8 @@ def party_colors():
 
     return pc
 
+## cSpell: enable
+
 def create_map_plot(merge,colormap,text):
 
     ax = merge.plot(column=0, cmap=colormap, linewidth=0.8, edgecolor='0.8', legend=True, categorical=True, legend_kwds={'loc':'lower right'})
@@ -151,5 +159,7 @@ def create_map_plot(merge,colormap,text):
 def create_parlament_plot(sortedparl,colors,label,text):
 
     plt.pie(sortedparl,colors=colors,wedgeprops=dict(width=0.5),startangle=90,labels=label,autopct=lambda x: electopy.display.display(x),pctdistance=0.75,textprops={'fontsize':'large','weight':'bold'})
-    plt.title('Composicion del Parlamento: '+text,fontdict={'fontsize':32})
+    plt.title('Parlament composition: '+text,fontdict={'fontsize':32})
     plt.show()
+
+## cSpell: ignore xoff yoff cmap vectorize

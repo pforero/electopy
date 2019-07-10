@@ -43,3 +43,5 @@ def test_transform():
     el2 = el.transform('PP','PSOE')
 
     assert all(el2.votes[0] == el.votes[0] + el.votes[1])
+
+# cSpell: ignore votos diputados PSOE
