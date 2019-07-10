@@ -8,8 +8,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
 
-import geopandas as gpd
-
 class election:
 
     def __init__(self,em,votes):
@@ -61,47 +59,29 @@ class election:
 
         return mas_vot
 
-    def spain_map(self, text=''):
+    def spain_map(self, canary_x=7, canary_y=5, text=''):
 
-        # This file should either be downloaded or done in some way where the location of the folder doesn't matter
+        esp = electopy.display.get_spain_map(x=canary_x, y=canary_y)
 
-        # Most of this should be divided into sub functions for easier readability
+        esp = electopy.display.proper_names(esp)
 
-        map_df = gpd.read_file('map/ne_10m_admin_1_states_provinces.shp')
-        spa = map_df.loc[map_df['iso_a2']=='ES']
+        results = pd.DataFrame(data=self.most_voted().values,index=self.most_voted().index.map(self.regions))
 
-        esp = electopy.display.move_canary(spa)
-
-        mapdict = electopy.display.correct_region_names()
-
-        esp = esp.assign(prov = esp['name'].replace(mapdict))
-
-        merge = esp.set_index('prov').join(pd.DataFrame(data=self.most_voted().values,index=self.most_voted().index.map(self.regions)))
+        merge = esp.join(results)
 
         colormap = ListedColormap(electopy.display.create_colors(self.most_voted().map(self.parties).unique()))
 
-        #plt.rcParams.update({'font.size':32})
-
-        #plt.figure(figsize=(31,19))
-        ax = merge.plot(column=0,cmap=colormap,linewidth=0.8,edgecolor='0.8',legend=True,categorical=True)
-        ax.set_axis_off()
-        ax.set_title('Ganador por Circunscripcion'+text)
-        plt.show()
+        electopy.display.create_map_plot(merge,colormap,text)
 
     def parlament_composition(self, text=''):
 
         sortedparl=self.parlament().sort_values(ascending=False)
 
-        label=electopy.display.create_labels(sortedparl.rename(self.parties))
+        label=electopy.display.create_parlament_labels(sortedparl.rename(self.parties))
 
-        colors=electopy.display.create_colors(sortedparl.rename(self.parties).index)
+        colors=electopy.display.create_parlament_colors(sortedparl.rename(self.parties).index)
 
-        #plt.rcParams.update({'font.size':12})
-
-        #plt.figure(figsize=(10,10))
-        plt.pie(sortedparl,colors=colors,wedgeprops=dict(width=0.5),startangle=90,labels=label,autopct=lambda x: electopy.display.display(x),pctdistance=0.75,textprops={'fontsize':'large','weight':'bold'})
-        plt.title('Composicion del Parlamento'+text,fontdict={'fontsize':32})
-        plt.show()
+        electopy.display.create_parlament_plot(sortedparl,colors,label,text)
 
     def transform(self, party1, party2, weight=1):
 
