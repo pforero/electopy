@@ -2,10 +2,30 @@ import electopy.display
 
 import numpy as np
 
+import matplotlib.pyplot as plt
 from matplotlib import cm
 from matplotlib.colors import to_hex
 
+import geopandas as gpd
+
 import shapely
+
+def get_spain_map(x=0,y=0):
+
+    # This file should either be downloaded or done in some way where the location of the folder doesn't matter
+
+    map_df = gpd.read_file('map/ne_10m_admin_1_states_provinces.shp')
+    spa = map_df.loc[map_df['iso_a2']=='ES'].copy()
+
+    esp = electopy.display.move_canary(spa, x=x, y=y)
+
+    return esp
+
+def move_canary(geo,x=0,y=0):
+    
+    geo.loc[geo['adm0_sr']==3,'geometry'] = geo.loc[geo['adm0_sr']==3,'geometry'].apply(lambda n: shapely.affinity.translate(n, xoff=x, yoff=y))
+    
+    return geo
 
 def correct_region_names():
     
@@ -31,15 +51,15 @@ def correct_region_names():
     
     return mapdict
 
-## Mover Canarias
+def proper_names(esp):
 
-def move_canary(geo,x=7,y=5):
-    
-    geo.loc[Geo['adm0_sr']==3,'geometry']=geo.loc[geo['adm0_sr']==3,'geometry'].apply(lambda n: shapely.affinity.translate(n,xoff=x,yoff=y))
-    
-    return geo
+    mapdict = electopy.display.correct_region_names()
 
-def create_labels(parl,limit=6):
+    esp = esp.assign(prov = esp['name'].replace(mapdict))
+
+    return esp.set_index('prov')
+
+def create_parlament_labels(parl,limit=6):
     
     label=list(parl.index)
     
@@ -80,12 +100,12 @@ def create_colors(parties):
 
         try: 
                     
-                c = partycolors[party]
+            c = partycolors[party]
 
         except:
 
-                c = extracolors[i]
-                i += 1
+            c = extracolors[i]
+            i += 1
 
         cmap.append(c)
     
@@ -119,3 +139,17 @@ def party_colors():
     }
 
     return pc
+
+def create_map_plot(merge,colormap,text):
+
+    ax = merge.plot(column=0, cmap=colormap, linewidth=0.8, edgecolor='0.8', legend=True, categorical=True, legend_kwds={'loc':'lower right'})
+    ax.set_axis_off()
+    ax.set_title('Winner by region: '+text)
+
+    plt.show()
+
+def create_parlament_plot(sortedparl,colors,label,text):
+
+    plt.pie(sortedparl,colors=colors,wedgeprops=dict(width=0.5),startangle=90,labels=label,autopct=lambda x: electopy.display.display(x),pctdistance=0.75,textprops={'fontsize':'large','weight':'bold'})
+    plt.title('Composicion del Parlamento: '+text,fontdict={'fontsize':32})
+    plt.show()

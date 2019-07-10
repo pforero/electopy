@@ -8,8 +8,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
 
-import geopandas as gpd
-
 class election:
 
     def __init__(self,em,votes):
@@ -57,60 +55,44 @@ class election:
 
     def most_voted(self):
 
-        mas_vot = self.votes.apply(lambda x: x.sort_values(ascending=False).index[0],axis=1)
+        most_voted = self.votes.apply(lambda x: x.sort_values(ascending=False).index[0],axis=1)
 
-        return mas_vot
+        return most_voted
 
-    def spain_map(self, text=''):
+    def spain_map(self, canary_x=7, canary_y=5, text=''):
 
-        # This file should either be downloaded or done in some way where the location of the folder doesn't matter
+        esp = electopy.display.get_spain_map(x=canary_x, y=canary_y)
 
-        # Most of this should be divided into sub functions for easier readability
+        esp = electopy.display.proper_names(esp)
 
-        map_df = gpd.read_file('map/ne_10m_admin_1_states_provinces.shp')
-        spa = map_df.loc[map_df['iso_a2']=='ES']
+        results = pd.DataFrame(data=self.most_voted().map(self.parties).values,index=self.most_voted().index.map(self.regions))
 
-        esp = electopy.display.move_canary(spa)
+        merge = esp.join(results)
 
-        mapdict = electopy.display.correct_region_names()
+        colormap = ListedColormap(electopy.display.create_colors(self.most_voted().map(self.parties).sort_values().unique()))
 
-        esp = esp.assign(prov = esp['name'].replace(mapdict))
-
-        merge = esp.set_index('prov').join(pd.DataFrame(data=self.most_voted().values,index=self.most_voted().index.map(self.regions)))
-
-        colormap = ListedColormap(electopy.display.create_colors(self.most_voted().map(self.parties).unique()))
-
-        #plt.rcParams.update({'font.size':32})
-
-        #plt.figure(figsize=(31,19))
-        ax = merge.plot(column=0,cmap=colormap,linewidth=0.8,edgecolor='0.8',legend=True,categorical=True)
-        ax.set_axis_off()
-        ax.set_title('Ganador por Circunscripcion'+text)
-        plt.show()
+        electopy.display.create_map_plot(merge,colormap,text)
 
     def parlament_composition(self, text=''):
 
         sortedparl=self.parlament().sort_values(ascending=False)
 
-        label=electopy.display.create_labels(sortedparl.rename(self.parties))
+        label=electopy.display.create_parlament_labels(sortedparl.rename(self.parties))
 
         colors=electopy.display.create_colors(sortedparl.rename(self.parties).index)
 
-        #plt.rcParams.update({'font.size':12})
-
-        #plt.figure(figsize=(10,10))
-        plt.pie(sortedparl,colors=colors,wedgeprops=dict(width=0.5),startangle=90,labels=label,autopct=lambda x: electopy.display.display(x),pctdistance=0.75,textprops={'fontsize':'large','weight':'bold'})
-        plt.title('Composicion del Parlamento'+text,fontdict={'fontsize':32})
-        plt.show()
+        electopy.display.create_parlament_plot(sortedparl,colors,label,text)
 
     def transform(self, party1, party2, weight=1):
 
         # Needs to find a new way to do (and store parameters) transformations
-        # Use party names, not party codes
 
-        new_votes=new_result(self.votes, party1 ,party2 ,weight)
+        party_code_1 = self.parties[self.parties==party1].index[0]
+        party_code_2 = self.parties[self.parties==party2].index[0]
 
-        new_election=electopy.election(self.em,new_votes)
+        new_votes = new_result(self.votes.copy(), party_code_1 ,party_code_2 ,weight)
+
+        new_election = electopy.election(self.em,new_votes)
 
         return new_election
 
@@ -124,7 +106,7 @@ class election:
 
 def new_result(votes,party1,party2,weight=1):
     
-    votes[party1]=votes[party1]+votes[party2]*weight
-    votes[party2]=votes[party2]*(1-weight)
+    votes[party1] = votes[party1]+votes[party2]*weight
+    votes[party2] = votes[party2]*(1-weight)
     
     return votes
