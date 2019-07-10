@@ -77,7 +77,7 @@ def display(pct):
 
         return '{:.0f}'.format(pct*3.5)
 
-def create_parlament_colors(parties):
+def create_colors(parties):
     
     partycolors = party_colors()
 

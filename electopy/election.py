@@ -55,9 +55,9 @@ class election:
 
     def most_voted(self):
 
-        mas_vot = self.votes.apply(lambda x: x.sort_values(ascending=False).index[0],axis=1)
+        most_voted = self.votes.apply(lambda x: x.sort_values(ascending=False).index[0],axis=1)
 
-        return mas_vot
+        return most_voted
 
     def spain_map(self, canary_x=7, canary_y=5, text=''):
 
@@ -79,7 +79,7 @@ class election:
 
         label=electopy.display.create_parlament_labels(sortedparl.rename(self.parties))
 
-        colors=electopy.display.create_parlament_colors(sortedparl.rename(self.parties).index)
+        colors=electopy.display.create_colors(sortedparl.rename(self.parties).index)
 
         electopy.display.create_parlament_plot(sortedparl,colors,label,text)
 
