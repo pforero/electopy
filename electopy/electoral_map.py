@@ -1,10 +1,9 @@
 class electoral_map:
-
-    def __init__ (self,parties,regions,distribution):
+    def __init__(self, parties, regions, distribution):
 
         if not regions.index.equals(distribution.index):
 
-            raise ValueError('Index of regions do not match the index of distribution')
+            raise ValueError("Index of regions do not match the index of distribution")
 
         self.parties = parties
         self.regions = regions
@@ -12,7 +11,9 @@ class electoral_map:
 
         self.total_mps = sum_mps(distribution)
 
+
 ##################################### Helper Functions #######################################
+
 
 def sum_mps(distribution):
 
