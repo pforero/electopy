@@ -1,113 +1,152 @@
 import electopy
 import electopy.display
-from electopy.electoral_map import electoral_map
+import electopy.electoral_map
 
 import pandas as pd
 import numpy as np
 
 from matplotlib.colors import ListedColormap
 
+
 class election:
+    def __init__(self, electoral_map, votes):
 
-    def __init__(self,em,votes):
+        if not isinstance(electoral_map, electopy.electoral_map.electoral_map):
 
-        if not isinstance(em,electoral_map):
+            raise ValueError(
+                "Not an Electoral Map: electoral_map is not of class electoral_map"
+            )
 
-            raise ValueError('Not an Electoral Map: em is not of class electoral_map')
+        if not votes.columns.equals(electoral_map.parties.index):
 
-        if not votes.columns.equals(em.parties.index):
+            raise ValueError(
+                "votes columns do not match the parties of the electoral map"
+            )
 
-            raise ValueError('votes columns do not match the parties of the electoral map')
+        if not votes.index.equals(electoral_map.regions.index):
 
-        if not votes.index.equals(em.regions.index):
+            raise ValueError(
+                "votes index does not match the regions of the electoral map"
+            )
 
-            raise ValueError('votes index does not match the regions of the electoral map')
-
-        self.em = em
+        self.electoral_map = electoral_map
         self.votes = votes
 
-        self.parties = em.parties
-        self.regions = em.regions
-        self.distribution = em.distribution
+        self.parties = electoral_map.parties
+        self.regions = electoral_map.regions
+        self.distribution = electoral_map.distribution
 
-    def mps(self,region):
+    def mps(self, region):
 
         # This should allow you to chose for which parties and which regions you get the result
-    
-        div = np.array([1/i for i in range(1,self.distribution[region]+1)])
 
-        df = self.votes.loc[region].apply(lambda x: x*div).apply(pd.Series).unstack().sort_values(ascending=False)[:self.distribution[region]]
+        fraction_per_mp = np.array(
+            [1 / i for i in range(1, self.distribution[region] + 1)]
+        )
 
-        x = df.index.get_level_values(1).value_counts()
+        df = (
+            self.votes.loc[region]
+            .apply(lambda votes_per_party: votes_per_party * fraction_per_mp)
+            .apply(pd.Series)
+            .unstack()
+            .sort_values(ascending=False)[: self.distribution[region]]
+        )
+
+        mps_allocated = df.index.get_level_values(1).value_counts()
 
         # It should return ALL parties mps chosen, not just with those with a value > 0
 
-        return x
+        return mps_allocated
 
     def parlament(self):
 
-        df = self.votes.apply(lambda x: self.mps(x.name),axis=1).replace(np.nan,0)
+        mps_per_region = self.votes.apply(
+            lambda votes_per_region: self.mps(votes_per_region.name), axis=1
+        ).replace(np.nan, 0)
 
-        total = df.sum().astype(int)
+        total_mps = mps_per_region.sum().astype(int)
 
-        return total
+        return total_mps
 
     def most_voted(self):
 
-        most_voted = self.votes.apply(lambda x: x.sort_values(ascending=False).index[0],axis=1)
+        most_voted = self.votes.apply(most_voted_party, axis=1)
 
         return most_voted
 
-    def spain_map(self, canary_x=7, canary_y=5, text=''):
+    def spain_map(self, canary_x=7, canary_y=5, text=""):
 
-        esp = electopy.display.get_spain_map(x=canary_x, y=canary_y)
+        spain_geo_dataframe = electopy.display.get_spain_map(x=canary_x, y=canary_y)
 
-        esp = electopy.display.proper_names(esp)
+        spain_geo_dataframe = electopy.display.proper_names(spain_geo_dataframe)
 
-        results = pd.DataFrame(data=self.most_voted().map(self.parties).values,index=self.most_voted().index.map(self.regions))
+        most_voted_party_per_region = pd.DataFrame(
+            data=self.most_voted().map(self.parties).values,
+            index=self.most_voted().index.map(self.regions),
+        )
 
-        merge = esp.join(results)
+        geo_and_most_voted = spain_geo_dataframe.join(most_voted_party_per_region)
 
-        colormap = ListedColormap(electopy.display.create_colors(self.most_voted().map(self.parties).sort_values().unique()))
+        colormap = ListedColormap(
+            electopy.display.create_colors(
+                self.most_voted().map(self.parties).sort_values().unique()
+            )
+        )
 
-        electopy.display.create_map_plot(merge,colormap,text)
+        electopy.display.create_map_plot(geo_and_most_voted, colormap, text)
 
-    def parlament_composition(self, text=''):
+    def parlament_composition(self, text=""):
 
-        sortedparl=self.parlament().sort_values(ascending=False)
+        sorted_parlament = self.parlament().sort_values(ascending=False)
 
-        label=electopy.display.create_parlament_labels(sortedparl.rename(self.parties))
+        labels = electopy.display.create_parlament_labels(
+            sorted_parlament.rename(self.parties)
+        )
 
-        colors=electopy.display.create_colors(sortedparl.rename(self.parties).index)
+        colors = electopy.display.create_colors(
+            sorted_parlament.rename(self.parties).index
+        )
 
-        electopy.display.create_parlament_plot(sortedparl,colors,label,text)
+        electopy.display.create_parlament_plot(sorted_parlament, colors, labels, text)
 
-    def transform(self, party1, party2, weight=1):
+    def transform(self, party_benefiting, party_losing, weight=1):
 
         # Needs to find a new way to do (and store parameters) transformations
 
-        party_code_1 = self.parties[self.parties==party1].index[0]
-        party_code_2 = self.parties[self.parties==party2].index[0]
+        party_benefiting_code = self.parties[self.parties == party_benefiting].index[0]
+        party_losing_code = self.parties[self.parties == party_losing].index[0]
 
-        new_votes = new_result(self.votes.copy(), party_code_1 ,party_code_2 ,weight)
+        new_votes = new_result(
+            self.votes.copy(), party_benefiting_code, party_losing_code, weight
+        )
 
-        new_election = electopy.election(self.em,new_votes)
+        new_election = electopy.election(self.electoral_map, new_votes)
 
         return new_election
 
-    def compare(self, el2):
+    def compare(self, comparison_election):
 
-        el = election(self.em,self.votes)
+        original_election = election(self.electoral_map, self.votes)
 
-        electopy.compare(el, el2)
+        electopy.compare(original_election, comparison_election)
+
 
 ######################################### Helper Functions ######################################################################
 
-def new_result(votes,party1,party2,weight=1):
-    
-    votes[party1] = votes[party1]+votes[party2]*weight
-    votes[party2] = votes[party2]*(1-weight)
-    
+
+def new_result(votes, party_benefiting_code, party_losing_code, weight=1):
+
+    votes[party_benefiting_code] = (
+        votes[party_benefiting_code] + votes[party_losing_code] * weight
+    )
+    votes[party_losing_code] = votes[party_losing_code] * (1 - weight)
+
     return votes
+
+
+def most_voted_party(votes_per_party):
+
+    return votes_per_party.sort_values(ascending=False).index[0]
+
 
 ## cSpell: ignore astype
