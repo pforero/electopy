@@ -3,9 +3,7 @@ class electoral_map:
 
         if not regions.index.equals(distribution.index):
 
-            raise ValueError(
-                "Index of regions do not match the index of distribution"
-            )
+            raise ValueError("Index of regions do not match the index of distribution")
 
         self.parties = parties
         self.regions = regions

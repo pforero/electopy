@@ -7,7 +7,9 @@ from electopy.election import election
 def from_mir(year=2016):
 
     election_dataframe = electopy.loading.load_election(year=year)
-    parties, regions, votes, distribution = electopy.loading.clean_mir(election_dataframe)
+    parties, regions, votes, distribution = electopy.loading.clean_mir(
+        election_dataframe
+    )
 
     electoral_map_object = electoral_map(parties, regions, distribution)
 

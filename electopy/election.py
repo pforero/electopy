@@ -9,7 +9,6 @@ from matplotlib.colors import ListedColormap
 
 
 class election:
-
     def __init__(self, electoral_map, votes):
 
         if not isinstance(electoral_map, electopy.electoral_map.electoral_map):
@@ -41,7 +40,9 @@ class election:
 
         # This should allow you to chose for which parties and which regions you get the result
 
-        fraction_per_mp = np.array([1 / i for i in range(1, self.distribution[region] + 1)])
+        fraction_per_mp = np.array(
+            [1 / i for i in range(1, self.distribution[region] + 1)]
+        )
 
         df = (
             self.votes.loc[region]
@@ -59,7 +60,9 @@ class election:
 
     def parlament(self):
 
-        mps_per_region = self.votes.apply(lambda votes_per_region: self.mps(votes_per_region.name), axis=1).replace(np.nan, 0)
+        mps_per_region = self.votes.apply(
+            lambda votes_per_region: self.mps(votes_per_region.name), axis=1
+        ).replace(np.nan, 0)
 
         total_mps = mps_per_region.sum().astype(int)
 
@@ -100,7 +103,9 @@ class election:
             sorted_parlament.rename(self.parties)
         )
 
-        colors = electopy.display.create_colors(sorted_parlament.rename(self.parties).index)
+        colors = electopy.display.create_colors(
+            sorted_parlament.rename(self.parties).index
+        )
 
         electopy.display.create_parlament_plot(sorted_parlament, colors, labels, text)
 
@@ -111,7 +116,9 @@ class election:
         party_benefiting_code = self.parties[self.parties == party_benefiting].index[0]
         party_losing_code = self.parties[self.parties == party_losing].index[0]
 
-        new_votes = new_result(self.votes.copy(), party_benefiting_code, party_losing_code, weight)
+        new_votes = new_result(
+            self.votes.copy(), party_benefiting_code, party_losing_code, weight
+        )
 
         new_election = electopy.election(self.electoral_map, new_votes)
 
@@ -129,7 +136,9 @@ class election:
 
 def new_result(votes, party_benefiting_code, party_losing_code, weight=1):
 
-    votes[party_benefiting_code] = votes[party_benefiting_code] + votes[party_losing_code] * weight
+    votes[party_benefiting_code] = (
+        votes[party_benefiting_code] + votes[party_losing_code] * weight
+    )
     votes[party_losing_code] = votes[party_losing_code] * (1 - weight)
 
     return votes
