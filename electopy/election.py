@@ -11,7 +11,7 @@ from matplotlib.colors import ListedColormap
 class election:
     def __init__(self, electoral_map, votes):
 
-        if not isinstance(electoral_map, electopy.electoral_map.electoral_map):
+        if not isinstance(electoral_map, electopy.electoral_map):
 
             raise ValueError(
                 "Not an Electoral Map: electoral_map is not of class electoral_map"
