@@ -16,7 +16,9 @@ def test_csv_load():
 
     el = electopy.from_df(csv_votes, csv_regions)
 
-    assert el.votes.sum().sum() == 23874674
+    vote_sum = el.votes.sum().sum()
+
+    assert vote_sum == 23874674
 
 
 # MIR Test
@@ -26,7 +28,9 @@ def test_mir_load():
 
     el = electopy.from_mir(year=2016)
 
-    assert el.votes.sum().sum() == 23874674
+    vote_sum = el.votes.sum().sum()
+
+    assert vote_sum == 23874674
 
 
 el = electopy.from_mir(year=2016)
@@ -34,25 +38,34 @@ el = electopy.from_mir(year=2016)
 
 def test_mps():
 
-    assert round(np.linalg.norm(el.mps(4)), 2) == 3.74
+    mps_norm = round(np.linalg.norm(el.mps(4)), 2)
+
+    assert mps_norm == 3.74
 
 
 def test_parlament():
 
-    assert el.parlament().sum() == 350
-    assert round(np.linalg.norm(el.parlament()), 2) == 171.66
+    total_mps = el.parlament().sum()
+    parlament_norm = round(np.linalg.norm(el.parlament()), 2)
+
+    assert total_mps == 350
+    assert parlament_norm == 171.66
 
 
 def test_most_voted():
 
-    assert round(np.linalg.norm(el.most_voted()), 2) == 10.91
+    most_voted_norm = round(np.linalg.norm(el.most_voted()), 2)
+
+    assert most_voted_norm == 10.91
 
 
 def test_transform():
 
     el2 = el.transform("PP", "PSOE")
 
-    assert all(el2.votes[0] == el.votes[0] + el.votes[1])
+    election_votes_diff = el2.votes[0] == el.votes[0] + el.votes[1]
+
+    assert all(election_votes_diff)
 
 
 # cSpell: ignore votos diputados PSOE
