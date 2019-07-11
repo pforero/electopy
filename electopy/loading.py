@@ -6,9 +6,9 @@ import urllib.request
 import zipfile
 
 
-def mir_dict():
+def get_mir_dictionary():
 
-    election_dictionary = {
+    election_mir_dictionary = {
         2016: "PROV_02_201606_1.zip",
         2015: "PROV_02_201512_1.zip",
         2011: "PROV_02_201111_1.zip",
@@ -24,44 +24,44 @@ def mir_dict():
         1977: "PROV_02_197706_1.zip",
     }
 
-    return election_dictionary
+    return election_mir_dictionary
 
 
 def get_file_name(year=2016):
 
-    mir_dictionary = mir_dict()
+    mir_dictionary = get_mir_dictionary()
 
     try:
 
-        filename = mir_dictionary[year]
+        file_name = mir_dictionary[year]
 
     except:
 
         print("Can not find the year of the election. 2016 will be loaded")
 
-        filename = mir_dictionary[2016]
+        file_name = mir_dictionary[2016]
 
-    return filename
+    return file_name
 
 
 def download_election(year=2016, save_folder="past_elections"):
 
-    miraddress = "http://www.infoelectoral.mir.es/infoelectoral/docxl/"
-    filename = get_file_name(year)
+    mir_address = "http://www.infoelectoral.mir.es/infoelectoral/docxl/"
+    file_name = get_file_name(year)
 
-    url = miraddress + filename
-    location = save_folder + "/" + filename
+    url = mir_address + file_name
+    save_location = save_folder + "/" + file_name
 
-    urllib.request.urlretrieve(url, location)
+    urllib.request.urlretrieve(url, save_location)
 
 
 def file_to_df(file_name):
 
     if file_name.endswith(".zip"):
 
-        end_file = file_name.rsplit("/")[-1][:-4] + ".xlsx"
+        excel_file_name = file_name.rsplit("/")[-1][:-4] + ".xlsx"
         archive = zipfile.ZipFile(file_name, "r")
-        excel_file = archive.open(end_file)
+        excel_file = archive.open(excel_file_name)
 
     else:
 
@@ -69,9 +69,9 @@ def file_to_df(file_name):
 
     # nrows=54 works because the number of regions is the same for all elections. If there were any changes it wouldn't work
 
-    df = pd.read_excel(excel_file, skiprows=range(3), nrows=54)
+    election_dataframe = pd.read_excel(excel_file, skiprows=range(3), nrows=54)
 
-    return df
+    return election_dataframe
 
 
 def load_election(file_name=None, year=2016, save_folder="past_elections"):
@@ -91,15 +91,15 @@ def load_election(file_name=None, year=2016, save_folder="past_elections"):
 
         try:
 
-            df = file_to_df(file_name)
+            election_dataframe = file_to_df(file_name)
 
         except:
 
             download_election(year=year, save_folder=save_folder)
 
-            df = file_to_df(file_name)
+            election_dataframe = file_to_df(file_name)
 
-        return df
+        return election_dataframe
 
 
 def get_parties(df):
