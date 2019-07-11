@@ -1,6 +1,6 @@
 from setuptools import setup
 
-requirements = ['pandas', 'numpy', 'geopandas', 'shapely', 'matplotlib', 'urllib', 'zipfile']
+requirements = ['pandas', 'numpy', 'geopandas', 'shapely', 'matplotlib']
 
 setup(
     name='electopy',
