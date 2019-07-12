@@ -4,7 +4,7 @@ Electopy is a simple Python library for analysis and exploration of General Elec
 
 ## Build and coverage status
 
-[![Build Status](https://travis-ci.org/pforero/electopy.svg?branch=master)](https://travis-ci.org/pforero/electopy)
+[![Build Status](https://travis-ci.com/pforero/electopy.svg?branch=master)](https://travis-ci.com/pforero/electopy)
 [![Coverage Status](https://coveralls.io/repos/github/pforero/electopy/badge.svg?branch=master)](https://coveralls.io/github/pforero/electopy?branch=master)
 
 ## Members of Parliament
