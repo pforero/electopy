@@ -1,3 +1,11 @@
+"""Class with the information of a general election
+
+Elections are the main class in electopy. They contain all the attributes of the 
+election (voting regions, political parties and votes per region per party). They also
+contain the methods for election analysis.
+
+"""
+
 import electopy
 import electopy.display
 import electopy.electoral_map
