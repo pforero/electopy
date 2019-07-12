@@ -70,7 +70,7 @@ class election:
 
     def most_voted(self):
 
-        most_voted = self.votes.apply(most_voted_party, axis=1)
+        most_voted = self.votes.apply(_most_voted_party, axis=1)
 
         return most_voted
 
@@ -116,7 +116,7 @@ class election:
         party_benefiting_code = self.parties[self.parties == party_benefiting].index[0]
         party_losing_code = self.parties[self.parties == party_losing].index[0]
 
-        new_votes = new_result(
+        new_votes = _new_result(
             self.votes.copy(), party_benefiting_code, party_losing_code, weight
         )
 
@@ -134,7 +134,7 @@ class election:
 ######################################### Helper Functions ######################################################################
 
 
-def new_result(votes, party_benefiting_code, party_losing_code, weight=1):
+def _new_result(votes, party_benefiting_code, party_losing_code, weight=1):
 
     votes[party_benefiting_code] = (
         votes[party_benefiting_code] + votes[party_losing_code] * weight
@@ -144,7 +144,7 @@ def new_result(votes, party_benefiting_code, party_losing_code, weight=1):
     return votes
 
 
-def most_voted_party(votes_per_party):
+def _most_voted_party(votes_per_party):
 
     return votes_per_party.sort_values(ascending=False).index[0]
 
