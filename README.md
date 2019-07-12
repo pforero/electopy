@@ -2,6 +2,11 @@
 
 Electopy is a simple Python library for analysis and exploration of General Election Results in Spain
 
+## Build and coverage status
+
+[![Build Status](https://travis-ci.org/pforero/electopy.svg?branch=master)](https://travis-ci.org/pforero/electopy)
+[![Coverage Status](https://coveralls.io/repos/github/pforero/electopy/badge.svg?branch=master)](https://coveralls.io/github/pforero/electopy?branch=master)
+
 ## Members of Parliament
 
 Aggregate votes by voting region and calculate the Elected Members of Parliament from each voting region. Obtain the composition of the Parliament given an election Result
