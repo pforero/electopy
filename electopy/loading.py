@@ -183,6 +183,7 @@ def clean_df(votes, distribution):
 
     return parties, regions, votes, distribution
 
+
 def download_map():
 
     SAVE_FOLDER = "map"
@@ -194,6 +195,6 @@ def download_map():
 
     urllib.request.urlretrieve(url, save_location)
 
-    zip_ref = zipfile.ZipFile(save_location,'r')
-    zip_ref.extractall(SAVE_FOLDER+"/")
+    zip_ref = zipfile.ZipFile(save_location, "r")
+    zip_ref.extractall(SAVE_FOLDER + "/")
     zip_ref.close()
