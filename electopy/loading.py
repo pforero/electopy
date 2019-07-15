@@ -46,10 +46,10 @@ def get_file_name(year=2016):
 
 def download_election(year=2016, save_folder="past_elections"):
 
-    mir_address = "http://www.infoelectoral.mir.es/infoelectoral/docxl/"
+    MIR_ADDRESS = "http://www.infoelectoral.mir.es/infoelectoral/docxl/"
     file_name = get_file_name(year)
 
-    url = mir_address + file_name
+    url = MIR_ADDRESS + file_name
     save_location = save_folder + "/" + file_name
 
     urllib.request.urlretrieve(url, save_location)
@@ -80,7 +80,7 @@ def load_election(file_name=None, year=2016, save_folder="past_elections"):
 
         try:
 
-            file_to_df(file_name)
+            election_dataframe = file_to_df(file_name)
 
         except:
 
@@ -182,3 +182,18 @@ def clean_df(votes, distribution):
     parties = pd.Series(data=parties.index.str.strip(), index=parties)
 
     return parties, regions, votes, distribution
+
+def download_map():
+
+    SAVE_FOLDER = "map"
+    MAP_ADDRESS = "https://www.naturalearthdata.com/http//www.naturalearthdata.com/download/10m/cultural/"
+    FILE_NAME = "ne_10m_admin_1_states_provinces.zip"
+
+    url = MAP_ADDRESS + FILE_NAME
+    save_location = SAVE_FOLDER + "/" + FILE_NAME
+
+    urllib.request.urlretrieve(url, save_location)
+
+    zip_ref = zipfile.ZipFile(save_location,'r')
+    zip_ref.extractall(SAVE_FOLDER+"/")
+    zip_ref.close()
