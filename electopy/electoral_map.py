@@ -9,13 +9,13 @@ class electoral_map:
         self.regions = regions
         self.distribution = distribution
 
-        self.total_mps = sum_mps(distribution)
+        self.total_mps = _sum_mps(distribution)
 
 
 ##################################### Helper Functions #######################################
 
 
-def sum_mps(distribution):
+def _sum_mps(distribution):
 
     total = distribution.sum()
 
