@@ -1,4 +1,5 @@
 import electopy.display
+import electopy.loading
 
 import numpy as np
 
@@ -13,9 +14,15 @@ import shapely
 
 def get_spain_map(x=0, y=0):
 
-    # This file should either be downloaded or done in some way where the location of the folder doesn't matter
+    try:
 
-    map_df = gpd.read_file("map/ne_10m_admin_1_states_provinces.shp")
+        map_df = gpd.read_file("map/ne_10m_admin_1_states_provinces.shp")
+
+    except:
+
+        electopy.loading.download_map()
+        map_df = gpd.read_file("map/ne_10m_admin_1_states_provinces.shp")
+
     spa = map_df.loc[map_df["iso_a2"] == "ES"].copy()
 
     esp = electopy.display.move_canary(spa, x=x, y=y)
