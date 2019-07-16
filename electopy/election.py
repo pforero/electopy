@@ -20,7 +20,7 @@ class election:
     """A Spanish general election.
 
     The election is the main class object of electopy. It represents a general election
-    in Spain and contains the methods to analyze the election results.
+    in Spain and contains the methods to analyse the election results.
 
     Parameters
     ----------
@@ -184,7 +184,7 @@ class election:
         electopy.display.create_map_plot(geo_and_most_voted, colormap, text)
 
     def parlament_composition(self, text=""):
-        """Display composition of the parlmanet by elected mps for each political party.
+        """Display composition of the parlament by elected mps for each political party.
 
         Creates and displays a pie chart with the representation of the number of
         elected mps in the parlament for each political party.
@@ -311,4 +311,4 @@ def _most_voted_party(votes_per_party):
     return party_with_most_votes
 
 
-## cSpell: ignore astype D'Hondt
+## cSpell: ignore astype D'Hondt colormap unstack
