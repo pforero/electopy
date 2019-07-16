@@ -7,6 +7,11 @@ import zipfile
 
 
 def get_mir_dictionary():
+    """ Dictionary with file names for each election
+
+    A dictionary that contains the file name of the zip file for each yearly election
+    in the MIR's web page
+    """
 
     election_mir_dictionary = {
         2016: "PROV_02_201606_1.zip",
