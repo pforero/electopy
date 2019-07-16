@@ -1,15 +1,16 @@
 import electopy.display
-import electopy.loading
 
 import numpy as np
+
+import urllib.request
+import zipfile
+
+import geopandas as gpd
+import shapely
 
 import matplotlib.pyplot as plt
 from matplotlib import cm
 from matplotlib.colors import to_hex
-
-import geopandas as gpd
-
-import shapely
 
 
 def get_spain_map(x=0, y=0):
@@ -20,7 +21,7 @@ def get_spain_map(x=0, y=0):
 
     except:
 
-        electopy.loading.download_map()
+        download_map()
         map_df = gpd.read_file("map/ne_10m_admin_1_states_provinces.shp")
 
     spa = map_df.loc[map_df["iso_a2"] == "ES"].copy()
@@ -201,6 +202,22 @@ def create_parlament_plot(sortedparl, colors, label, text):
     )
     plt.title("Parlament composition: " + text, fontdict={"fontsize": 32})
     plt.show()
+
+
+def download_map():
+
+    SAVE_FOLDER = "map"
+    MAP_ADDRESS = "https://www.naturalearthdata.com/http//www.naturalearthdata.com/download/10m/cultural/"
+    FILE_NAME = "ne_10m_admin_1_states_provinces.zip"
+
+    url = MAP_ADDRESS + FILE_NAME
+    save_location = SAVE_FOLDER + "/" + FILE_NAME
+
+    urllib.request.urlretrieve(url, save_location)
+
+    zip_ref = zipfile.ZipFile(save_location, "r")
+    zip_ref.extractall(SAVE_FOLDER + "/")
+    zip_ref.close()
 
 
 ## cSpell: ignore xoff yoff cmap vectorize

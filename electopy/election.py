@@ -17,6 +17,34 @@ from matplotlib.colors import ListedColormap
 
 
 class election:
+    """A Spanish general election.
+
+    The election is the main class object of electopy. It represents a general election
+    in Spain and contains the methods to analyze the election results.
+
+    Parameters
+    ----------
+    electoral_map: obj
+        Electoral map of the election before voting.
+    votes: DataFrame
+        Votes per region per party in the election result.
+
+    Attributes
+    ----------
+    electoral_map: obj
+        Electoral map of the election before voting.
+    votes: DataFrame
+        Votes per region per party in the election result.
+    parties: Series
+        Political parties in the election.
+    regions: Series
+        Voting regions in the election.
+    distribution: Series
+        Allocated distribution of electable mps per voting region.
+
+
+    """
+
     def __init__(self, electoral_map, votes):
 
         if not isinstance(electoral_map, electopy.electoral_map):
@@ -45,6 +73,22 @@ class election:
         self.distribution = electoral_map.distribution
 
     def mps(self, region):
+        """Get the members of parties elected for each party in a region.
+
+        The mps per party are calculated using the D'Hondt method 
+        (https://en.wikipedia.org/wiki/D%27Hondt_method).
+
+        Parameters
+        ----------
+        region: int
+            Region for which the distribution of mps per party is calculated.
+
+        Returns
+        -------
+        mps_allocated: Series
+            Elected mps for each political party in the region.
+
+        """
 
         # This should allow you to chose for which parties and which regions you get the result
 
@@ -67,6 +111,17 @@ class election:
         return mps_allocated
 
     def parlament(self):
+        """Parlament composition from the election.
+
+        Calculates the total mps for each political party in the parliament. Does this 
+        by calculating the mps for each voting region and adding them by party.
+
+        Returns
+        -------
+        total_mps
+            Total number of elected mps for each political party.
+
+        """
 
         mps_per_region = self.votes.apply(
             lambda votes_per_region: self.mps(votes_per_region.name), axis=1
@@ -77,12 +132,37 @@ class election:
         return total_mps
 
     def most_voted(self):
+        """The party with more votes for each region.
+
+        Returns which political party obtains the most votes in each voting region.
+
+        Returns
+        -------
+        most_voted: Series
+            Party with the most votes in each region.
+
+        """
 
         most_voted = self.votes.apply(_most_voted_party, axis=1)
 
         return most_voted
 
     def spain_map(self, canary_x=7, canary_y=5, text=""):
+        """Display a map of Spain with the most voted party in each region.
+
+        Creates and displays a map of Spain representing the most voted party in each
+        voting region.
+
+        Parameters
+        ----------
+        canary_x: float
+            X-coordinate move of the Canary Islands from original position
+        canary_y: float
+            Y-coordinate move of the Canary Islands from original position
+        text: str
+            Additional text to add to the plot title
+
+        """
 
         spain_geo_dataframe = electopy.display.get_spain_map(x=canary_x, y=canary_y)
 
@@ -104,6 +184,17 @@ class election:
         electopy.display.create_map_plot(geo_and_most_voted, colormap, text)
 
     def parlament_composition(self, text=""):
+        """Display composition of the parlmanet by elected mps for each political party.
+
+        Creates and displays a pie chart with the representation of the number of
+        elected mps in the parlament for each political party.
+
+        Parameters
+        ----------
+        text: str
+            Additional text to add to the plot title
+        
+        """
 
         sorted_parlament = self.parlament().sort_values(ascending=False)
 
@@ -117,7 +208,28 @@ class election:
 
         electopy.display.create_parlament_plot(sorted_parlament, colors, labels, text)
 
-    def transform(self, party_benefiting, party_losing, weight=1):
+    def transform(self, party_benefiting, party_losing, weight=1.0):
+        """Create a new election by changing the results of the election.
+
+        Creates a new election object which shares the same electoral map as the
+        election, but changes the result with a shift of votes from the losing party to
+        the benefiting party.
+
+        Parameters
+        ----------
+        party_benefiting: str
+            Name of the political party which gets a positive influx of votes.
+        party_losing: str
+            Name of the political party which gets a negative influx of votes.
+        weight: float
+            Share of votes from the losing party which goes to the benefiting party.
+
+        Returns
+        -------
+        election: obj
+            An electopy election class.
+
+        """
 
         # Needs to find a new way to do (and store parameters) transformations
 
@@ -133,16 +245,40 @@ class election:
         return new_election
 
     def compare(self, comparison_election):
+        """Compare two elections.
+
+        This function still needs to be done.
+
+        """
 
         original_election = election(self.electoral_map, self.votes)
 
         electopy.compare(original_election, comparison_election)
 
 
-######################################### Helper Functions ######################################################################
+def _new_result(votes, party_benefiting_code, party_losing_code, weight=1.0):
+    """Calculate the new voting results.
 
+    Returns the transformation of votes, to a new result were a share (weight) of votes
+    form party_losing goes to party_benefiting.
 
-def _new_result(votes, party_benefiting_code, party_losing_code, weight=1):
+    Parameters
+    ----------
+    votes: DataFrame
+        Votes per region per party in the election result.
+    party_benefiting: int
+        Code of the political party which gets a positive influx of votes.
+    party_losing: int
+        Code of the political party which gets a negative influx of votes.
+    weight: float
+        Share of votes from the losing party which goes to the benefiting party.
+
+    Returns
+    -------
+    votes: DataFrame
+        New votes per region per party in the election result.
+
+    """
 
     votes[party_benefiting_code] = (
         votes[party_benefiting_code] + votes[party_losing_code] * weight
@@ -153,8 +289,26 @@ def _new_result(votes, party_benefiting_code, party_losing_code, weight=1):
 
 
 def _most_voted_party(votes_per_party):
+    """Calculate the most voted party.
 
-    return votes_per_party.sort_values(ascending=False).index[0]
+    Given the number of votes per party in a region, calculates which is the most voted
+    political party.
+
+    Parameters
+    ----------
+    votes_per_party: Series
+        The number of votes each political party got in a region.
+
+    Returns
+    -------
+    party_with_most_votes: int
+        Code of the political party with the largest number of votes.
+
+    """
+
+    party_with_most_votes = votes_per_party.sort_values(ascending=False).index[0]
+
+    return party_with_most_votes
 
 
-## cSpell: ignore astype
+## cSpell: ignore astype D'Hondt
