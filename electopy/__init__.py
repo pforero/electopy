@@ -1,4 +1,4 @@
-"""Electopy
+"""electopy
 
 This module does simple electoral maths for Spain general election results. 
 Election results can be obtained directly from Spain's Ministry of Interior or from 

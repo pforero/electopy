@@ -1,8 +1,9 @@
-"""Class with the pre-election information of the election
+"""Class with the pre-election information of the election.
 
 This class stores the infomation of the election before the results.
 
 """
+
 
 class electoral_map:
     """An electoral map before the election takes place.

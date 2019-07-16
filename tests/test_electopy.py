@@ -43,13 +43,13 @@ def test_mps():
     assert mps_norm == 3.74
 
 
-def test_parlament():
+def test_parliament():
 
-    total_mps = el.parlament().sum()
-    parlament_norm = round(np.linalg.norm(el.parlament()), 2)
+    total_mps = el.parliament().sum()
+    parliament_norm = round(np.linalg.norm(el.parliament()), 2)
 
     assert total_mps == 350
-    assert parlament_norm == 171.66
+    assert parliament_norm == 171.66
 
 
 def test_most_voted():

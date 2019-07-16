@@ -1,3 +1,10 @@
+"""electopy.display
+
+This module contains all the necessary functions to create graphical representations of
+the elections for the electopy.election object.
+
+"""
+
 import electopy.display
 
 import numpy as np
@@ -13,7 +20,28 @@ from matplotlib import cm
 from matplotlib.colors import to_hex
 
 
-def get_spain_map(x=0, y=0):
+def get_spain_map(x=0.0, y=0.0):
+    """Obtain the geographic data representing the map of Spain.
+
+    Create a GeoPandas dataframe with the geographic data for each voting region in
+    Spain. Needed to create a map representation of the election results.
+
+    The shape file is obtained from Natural Earth Data. If it is not found it downloads
+    the Admin1 global map, and then chooses only the regions for Spain.
+
+    Parameters
+    ----------
+    x: float
+        X-coordinate move of the Canary Islands from original position.
+    y: float
+        Y-coordinate move of the Canary Islands from original position.
+
+    Returns
+    -------
+    esp: GeoPandas.DataFrame
+        Geographic information (including geographic shape) for each region in Spain.
+
+    """
 
     try:
 
@@ -32,6 +60,27 @@ def get_spain_map(x=0, y=0):
 
 
 def move_canary(geo, x=0, y=0):
+    """Change the geographic position of the Canary Islands (CI).
+
+    Get a GeoPandas dataframe with geographical data for all regions in spain, and
+    transform the x and y coordinates of the geographic data of the regions which are
+    part of the Canary Islands (adm0_sr == 3).
+
+    Parameters
+    ----------
+    geo: GeoPandas.DataFrame
+        Geographic information (including geographic shape) for each region in Spain.
+    x: float
+        X-coordinate move of the Canary Islands from original position.
+    y: float
+        Y-coordinate move of the Canary Islands from original position.
+
+    Returns
+    -------
+    geo: GeoPandas.DataFrame
+        New geographic information for each region in Spain, including changes in CI.
+
+    """
 
     geo.loc[geo["adm0_sr"] == 3, "geometry"] = geo.loc[
         geo["adm0_sr"] == 3, "geometry"
@@ -44,6 +93,19 @@ def move_canary(geo, x=0, y=0):
 
 
 def correct_region_names():
+    """Dictionary with correct spelling of region names.
+
+    Natural Earth Data (NED) has the names of the regions with different spelling than 
+    those used by the Ministry of Interior (MIR) in Spain for electoral data. This
+    function returns a dictionary for every mispelt region in NED with the corresponding
+    correct spelling used in MIR.
+
+    Returns
+    -------
+    mapdict: dict
+        Mapping of mispelt regions to their correct spelling.
+
+    """
 
     mapdict = {
         "CÃ¡ceres": "Cáceres",
@@ -72,15 +134,52 @@ def correct_region_names():
 
 
 def proper_names(esp):
+    """Change the region names in Natural Earth Data to correctly spelt names.
+
+    Adapt the names of the regions from the Natural Earth Data Admin1 dataset, to the
+    names used by the Ministry of Interior for reporting its electoral results.
+
+    Parameters
+    ----------
+    esp: GeoPandas.DataFrame
+        Geographic information for each region in Spain.
+
+    Returns
+    -------
+    esp: GeoPandas.DataFrame
+        New geographic information for each region in Spain with correct names.
+
+    """
 
     mapdict = electopy.display.correct_region_names()
 
     esp = esp.assign(prov=esp["name"].replace(mapdict))
 
-    return esp.set_index("prov")
+    esp = esp.set_index("prov")
+
+    return esp
 
 
-def create_parlament_labels(parl, limit=6):
+def create_parliament_labels(parl, limit=6):
+    """Format the party labels shown in the parliament composition.
+
+    Create the labels used to display the party names in the parliament composition.
+    Limit is used to only show the most voted political parties. Parties over the limit
+    will have an empty label.
+
+    Parameters
+    ----------
+    parl: Series
+        Ordered list of all political parties with representation in parliament.
+    limit: int
+        Maximum number of parties which have a label on the plot.
+
+    Returns
+    -------
+    label: list
+        The labels used to plot the parties' names in parliament composition.
+
+    """
 
     label = list(parl.index)
 
@@ -94,6 +193,24 @@ def create_parlament_labels(parl, limit=6):
 
 
 def display(pct):
+    """Function used to display the number of mps obtained by each party.
+
+    The function returns a string to display, if the party has obtained more than 1.5%
+    of the total mps. The percentage is multiplied by 3.5 in order to represent the
+    number of mps instead of the percentage. Currently there are 350 mps in the Spanish
+    parliament.
+
+    Parameter
+    ---------
+    pct: float
+        Percentage value.
+
+    Returns
+    -------
+    :str
+        Number of mps.
+
+    """
 
     if pct > 1.5:
 
@@ -188,7 +305,7 @@ def create_map_plot(merge, colormap, text):
     plt.show()
 
 
-def create_parlament_plot(sortedparl, colors, label, text):
+def create_parliament_plot(sortedparl, colors, label, text):
 
     plt.pie(
         sortedparl,
@@ -200,7 +317,7 @@ def create_parlament_plot(sortedparl, colors, label, text):
         pctdistance=0.75,
         textprops={"fontsize": "large", "weight": "bold"},
     )
-    plt.title("Parlament composition: " + text, fontdict={"fontsize": 32})
+    plt.title("parliament composition: " + text, fontdict={"fontsize": 32})
     plt.show()
 
 
@@ -220,4 +337,4 @@ def download_map():
     zip_ref.close()
 
 
-## cSpell: ignore xoff yoff cmap vectorize
+## cSpell: ignore xoff yoff cmap vectorize prov parl sortedparl colormap edgecolor autopct pctdistance fontdict
