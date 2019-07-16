@@ -1,7 +1,7 @@
 """Electopy.loading
 
 This module contains functions that help to load election results, both from the
-Minstry's of Interior (MIR) webpage or from a custom dataframe, and clean those results
+Ministry's of Interior (MIR) webpage or from a custom dataframe, and clean those results
 into the format used by electopy to create electoral_maps and elections.
 
 """
@@ -412,3 +412,4 @@ def _distribution_of_mps(mps):
 
 
 # cSpell: ignore inplace astype iloc rsplit nrows xlsx Diputados Código Votos Nombre
+# cSpell: ignore MIR's PROV Provincia Provincias
