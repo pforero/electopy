@@ -203,6 +203,7 @@ def create_parlament_plot(sortedparl, colors, label, text):
     plt.title("Parlament composition: " + text, fontdict={"fontsize": 32})
     plt.show()
 
+
 def download_map():
 
     SAVE_FOLDER = "map"
@@ -217,5 +218,6 @@ def download_map():
     zip_ref = zipfile.ZipFile(save_location, "r")
     zip_ref.extractall(SAVE_FOLDER + "/")
     zip_ref.close()
+
 
 ## cSpell: ignore xoff yoff cmap vectorize
