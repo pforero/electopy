@@ -1,6 +1,6 @@
 """Electopy
 
-This module does simple electoral math for Spain general election results. 
+This module does simple electoral maths for Spain general election results. 
 Election results can be obtained directly from Spain's Ministry of Interior or from 
 panda's dataframes following a specific format.
 
