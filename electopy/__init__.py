@@ -26,7 +26,7 @@ def from_mir(year=2016):
 
     Returns
     -------
-    election_object
+    election_object: obj
         An electopy election class.
 
     Notes
