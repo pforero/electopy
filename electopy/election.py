@@ -1,4 +1,4 @@
-"""Class with the information of a general election
+"""Class with the information of a general election.
 
 Elections are the main class in electopy. They contain all the attributes of the 
 election (voting regions, political parties and votes per region per party). They also
@@ -20,7 +20,7 @@ class election:
     """A Spanish general election.
 
     The election is the main class object of electopy. It represents a general election
-    in Spain and contains the methods to analyze the election results.
+    in Spain and contains the methods to analyse the election results.
 
     Parameters
     ----------
@@ -110,8 +110,8 @@ class election:
 
         return mps_allocated
 
-    def parlament(self):
-        """Parlament composition from the election.
+    def parliament(self):
+        """parliament composition from the election.
 
         Calculates the total mps for each political party in the parliament. Does this 
         by calculating the mps for each voting region and adding them by party.
@@ -156,11 +156,11 @@ class election:
         Parameters
         ----------
         canary_x: float
-            X-coordinate move of the Canary Islands from original position
+            X-coordinate move of the Canary Islands from original position.
         canary_y: float
-            Y-coordinate move of the Canary Islands from original position
+            Y-coordinate move of the Canary Islands from original position.
         text: str
-            Additional text to add to the plot title
+            Additional text to add to the plot title.
 
         """
 
@@ -183,30 +183,30 @@ class election:
 
         electopy.display.create_map_plot(geo_and_most_voted, colormap, text)
 
-    def parlament_composition(self, text=""):
-        """Display composition of the parlmanet by elected mps for each political party.
+    def parliament_composition(self, text=""):
+        """Display composition of the parliament by elected mps for each political party.
 
         Creates and displays a pie chart with the representation of the number of
-        elected mps in the parlament for each political party.
+        elected mps in the parliament for each political party.
 
         Parameters
         ----------
         text: str
-            Additional text to add to the plot title
+            Additional text to add to the plot title.
         
         """
 
-        sorted_parlament = self.parlament().sort_values(ascending=False)
+        sorted_parliament = self.parliament().sort_values(ascending=False)
 
-        labels = electopy.display.create_parlament_labels(
-            sorted_parlament.rename(self.parties)
+        labels = electopy.display.create_parliament_labels(
+            sorted_parliament.rename(self.parties)
         )
 
         colors = electopy.display.create_colors(
-            sorted_parlament.rename(self.parties).index
+            sorted_parliament.rename(self.parties).index
         )
 
-        electopy.display.create_parlament_plot(sorted_parlament, colors, labels, text)
+        electopy.display.create_parliament_plot(sorted_parliament, colors, labels, text)
 
     def transform(self, party_benefiting, party_losing, weight=1.0):
         """Create a new election by changing the results of the election.
@@ -311,4 +311,4 @@ def _most_voted_party(votes_per_party):
     return party_with_most_votes
 
 
-## cSpell: ignore astype D'Hondt
+## cSpell: ignore astype D'Hondt colormap unstack

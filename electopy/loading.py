@@ -1,4 +1,4 @@
-"""Electopy.loading
+"""electopy.loading
 
 This module contains functions that help to load election results, both from the
 Ministry's of Interior (MIR) webpage or from a custom dataframe, and clean those results
@@ -411,5 +411,4 @@ def _distribution_of_mps(mps):
     return distribution
 
 
-# cSpell: ignore inplace astype iloc rsplit nrows xlsx Diputados Código Votos Nombre
-# cSpell: ignore MIR's PROV Provincia Provincias
+## cSpell: ignore inplace astype iloc rsplit nrows xlsx Diputados Código Votos Nombre MIR's PROV Provincia Provincias

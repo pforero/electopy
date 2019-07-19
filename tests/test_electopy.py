@@ -1,3 +1,10 @@
+"""Pytest for electopy
+
+A series of test using pytest. Tests both, loading by dataframe and from Spain's
+Ministry of Interior database.
+
+"""
+
 import pytest
 
 import electopy
@@ -13,6 +20,11 @@ csv_regions = pd.read_csv(
 
 
 def test_csv_load():
+    """Test for election created via dataframe.
+
+    Creates election from dataframe, and then checks the total number of votes.
+
+    """
 
     el = electopy.from_df(csv_votes, csv_regions)
 
@@ -25,6 +37,11 @@ def test_csv_load():
 
 
 def test_mir_load():
+    """Test for election created via MIR.
+
+    Creates election from MIR's dataset, and then checks the total number of votes.
+
+    """
 
     el = electopy.from_mir(year=2016)
 
@@ -37,22 +54,38 @@ el = electopy.from_mir(year=2016)
 
 
 def test_mps():
+    """Test function electopy.mps().
+
+    Checks the number of elected mps for region 4.
+
+    """
 
     mps_norm = round(np.linalg.norm(el.mps(4)), 2)
 
     assert mps_norm == 3.74
 
 
-def test_parlament():
+def test_parliament():
+    """Test function electopy.parliament().
 
-    total_mps = el.parlament().sum()
-    parlament_norm = round(np.linalg.norm(el.parlament()), 2)
+    Checks if the total number of elected mps is 350 and the distribution per party
+    (does this by using norm).
+
+    """
+
+    total_mps = el.parliament().sum()
+    parliament_norm = round(np.linalg.norm(el.parliament()), 2)
 
     assert total_mps == 350
-    assert parlament_norm == 171.66
+    assert parliament_norm == 171.66
 
 
 def test_most_voted():
+    """Test function electopy.most_voted().
+
+    Check if the most voted party for all regions.
+
+    """
 
     most_voted_norm = round(np.linalg.norm(el.most_voted()), 2)
 
@@ -60,6 +93,12 @@ def test_most_voted():
 
 
 def test_transform():
+    """Test function electopy.transform().
+
+    Check if the new number of votes for party 0 is the sum of the old votes from
+    party 0 and party 1 in the old election. Does this for all regions.
+
+    """
 
     el2 = el.transform("PP", "PSOE")
 
@@ -68,4 +107,4 @@ def test_transform():
     assert all(election_votes_diff)
 
 
-# cSpell: ignore votos diputados PSOE
+# cSpell: ignore votos diputados PSOE MIR's
