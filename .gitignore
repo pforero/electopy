@@ -105,6 +105,7 @@ venv.bak/
 
 # VSCode
 .vscode
+electopy_workspace.code-workspace
 
 #map
 ne_10m_admin_1_states_provinces.cpg

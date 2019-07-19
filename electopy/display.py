@@ -218,6 +218,22 @@ def display(pct):
 
 
 def create_colors(parties):
+    """Make a list of colors for plots.
+
+    Create the list of colors used to display. If the party exists in the party_colors
+    dictionary, use the party's corresponding colour. Else use a random colour.
+
+    Parameters
+    ----------
+    parties: list
+        Names of parties which are displayed in the plot.
+
+    Returns
+    -------
+    cmap: list
+        List of colors used in the plot.
+
+    """
 
     partycolors = party_colors()
 
@@ -256,6 +272,17 @@ def create_colors(parties):
 
 
 def party_colors():
+    """Dictionary with political parties and their corresponding color.
+
+    Return a dictionary with some political parties and the color normally used to
+    represent the party visually.
+
+    Returns
+    -------
+    pc: dict
+        Dictionary with partie's name and their color.
+
+    """
 
     pc = {
         "PSOE": "#ED1C24",
@@ -289,6 +316,21 @@ def party_colors():
 
 
 def create_map_plot(merge, colormap, text):
+    """Display map of Spain with most voted party per region.
+
+    Create and display the plot with the map of Spain, showing which party earned the
+    most votes in each voting region.
+
+    Parameters
+    ----------
+    merge: GeoPandas.DataFrame
+        The shapes of the regions and the most voted party for each region.
+    colormap: list
+        The display colors used to create the map.
+    text: str
+        Additional text to add to the plot title.
+
+    """
 
     ax = merge.plot(
         column=0,
@@ -306,6 +348,23 @@ def create_map_plot(merge, colormap, text):
 
 
 def create_parliament_plot(sortedparl, colors, label, text):
+    """Display plot showing the parliament composition.
+
+    Create and display a pie chart, showing the total number of elected mps in the
+    parliament for each political party.
+
+    Parameters
+    ----------
+    sortedparl: Series
+        Number of elected mps for each party, sorted by number of mps.
+    colors: list
+        The display colors used to create the plot.
+    label: list
+        Names of political parties to display in the plot.
+    text: str
+        Additional text to add to the plot title.
+
+    """
 
     plt.pie(
         sortedparl,
@@ -322,6 +381,13 @@ def create_parliament_plot(sortedparl, colors, label, text):
 
 
 def download_map():
+    """Dowload Natural Earth Data map information.
+
+    Downloads for the Natural Earth Data the Admin 1 map, which contains the
+    geographical shapes of each region in the world. Importantly, for Spain, these match
+    the voting regions. The shapes are used to create plots with the map of Spain.
+
+    """
 
     SAVE_FOLDER = "map"
     MAP_ADDRESS = "https://www.naturalearthdata.com/http//www.naturalearthdata.com/download/10m/cultural/"
