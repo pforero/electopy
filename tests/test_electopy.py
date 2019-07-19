@@ -9,6 +9,7 @@ import pytest
 
 import electopy
 import pandas as pd
+import numpy as np
 
 # CSV Test
 
