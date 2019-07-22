@@ -139,36 +139,6 @@ def create_map_plot(merge, colormap, text, show=True):
     return ax
 
 
-def _move_canary(geo, x=0, y=0):
-    """Change the geographic position of the Canary Islands (CI).
-
-    Get a GeoPandas dataframe with geographical data for all regions in spain, and
-    transform the x and y coordinates of the geographic data of the regions which are
-    part of the Canary Islands (adm0_sr == 3).
-
-    Parameters
-    ----------
-    geo: GeoPandas.DataFrame
-        Geographic information (including geographic shape) for each region in Spain.
-    x: float
-        X-coordinate move of the Canary Islands from original position.
-    y: float
-        Y-coordinate move of the Canary Islands from original position.
-
-    Returns
-    -------
-    geo: GeoPandas.DataFrame
-        New geographic information for each region in Spain, including changes in CI.
-
-    """
-
-    geo.loc[geo["adm0_sr"] == 3, "geometry"] = geo.loc[
-        geo["adm0_sr"] == 3, "geometry"
-    ].apply(lambda n: shapely.affinity.translate(n, xoff=x, yoff=y))
-
-    return geo
-
-
 def create_parliament_labels(parl, limit=6):
     """Format the party labels shown in the parliament composition.
 
@@ -337,6 +307,36 @@ def _unzip_file(file_name):
     zip_ref = zipfile.ZipFile(save_location, "r")
     zip_ref.extractall(SAVE_FOLDER + "/")
     zip_ref.close()
+
+
+def _move_canary(geo, x=0, y=0):
+    """Change the geographic position of the Canary Islands (CI).
+
+    Get a GeoPandas dataframe with geographical data for all regions in spain, and
+    transform the x and y coordinates of the geographic data of the regions which are
+    part of the Canary Islands (adm0_sr == 3).
+
+    Parameters
+    ----------
+    geo: GeoPandas.DataFrame
+        Geographic information (including geographic shape) for each region in Spain.
+    x: float
+        X-coordinate move of the Canary Islands from original position.
+    y: float
+        Y-coordinate move of the Canary Islands from original position.
+
+    Returns
+    -------
+    geo: GeoPandas.DataFrame
+        New geographic information for each region in Spain, including changes in CI.
+
+    """
+
+    geo.loc[geo["adm0_sr"] == 3, "geometry"] = geo.loc[
+        geo["adm0_sr"] == 3, "geometry"
+    ].apply(lambda n: shapely.affinity.translate(n, xoff=x, yoff=y))
+
+    return geo
 
 
 ## cSpell: disable
