@@ -43,14 +43,24 @@ def get_spain_map(x=0.0, y=0.0):
 
     """
 
+    FILE_NAME = "ne_10m_admin_1_states_provinces.zip"
+    SHAPE_LOCATION = "map/ne_10m_admin_1_states_provinces.shp"
+
     try:
 
-        map_df = gpd.read_file("map/ne_10m_admin_1_states_provinces.shp")
+        map_df = gpd.read_file(SHAPE_LOCATION)
 
     except:
 
-        download_map()
-        map_df = gpd.read_file("map/ne_10m_admin_1_states_provinces.shp")
+        try:
+
+            unzip_file(FILE_NAME)
+
+        except:
+
+            download_map()
+
+        map_df = gpd.read_file(SHAPE_LOCATION)
 
     spa = map_df.loc[map_df["iso_a2"] == "ES"].copy()
 
@@ -420,6 +430,25 @@ def download_map():
     save_location = SAVE_FOLDER + "/" + FILE_NAME
 
     urllib.request.urlretrieve(url, save_location)
+
+    unzip_file(FILE_NAME)
+
+
+def unzip_file(file_name):
+    """Unzip files from Natural Earth Data map.
+
+    Once downloaded the zip file from NED, unzip the file in the save folder.
+
+    Parameters
+    ----------
+    file_name: str
+        Name of file to unzip.
+
+    """
+
+    SAVE_FOLDER = "map"
+
+    save_location = SAVE_FOLDER + "/" + file_name
 
     zip_ref = zipfile.ZipFile(save_location, "r")
     zip_ref.extractall(SAVE_FOLDER + "/")
