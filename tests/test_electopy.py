@@ -91,17 +91,6 @@ def test_most_voted():
 
     assert most_voted_norm == 10.91
 
-def test_most_voted_not_nan():
-    """Test function electopy.most_voted().
-
-    Check if the name of a party of the most voted is not na.
-
-    """
-
-    party_list = el.most_voted().map(el.parties)
-
-    assert all(~party_list.isna())
-
 
 def test_transform():
     """Test function electopy.transform().

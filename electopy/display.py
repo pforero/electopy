@@ -362,10 +362,13 @@ def _correct_region_names():
         "Orense": "Ourense",
         "CÃ¡diz": "Cádiz",
         "CastellÃ³n": "Castellón / Castelló",
+        "Castellón": "Castellón / Castelló",
         "AlmerÃ­a": "Almería",
         "MÃ¡laga": "Málaga",
         "La CoruÃ±a": "A Coruña",
+        "La Coruña": "A Coruña",
         "Ãlava": "Araba - Álava",
+        "Álava": "Araba - Álava",
         "LeÃ³n": "León",
         "Ãvila": "Ávila",
         "CÃ³rdoba": "Córdoba",
@@ -375,6 +378,7 @@ def _correct_region_names():
         "Baleares": "Illes Balears",
         "Gerona": "Girona",
         "LÃ©rida": "Lleida",
+        "Lérida": "Lleida",
     }
 
     return mapdict
