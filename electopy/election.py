@@ -182,7 +182,8 @@ class election:
 
         geo_and_most_voted = spain_geo_dataframe.join(most_voted_party_per_region)
 
-        print(geo_and_most_voted.loc[geo_and_most_voted[0].isna()])
+        print(spain_geo_dataframe.index)
+        print(most_voted_party_per_region.index)
 
         colormap = ListedColormap(
             electopy.display.create_colors(
