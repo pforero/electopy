@@ -352,7 +352,7 @@ def create_map_plot(merge, colormap, text, show=True):
     ax.set_title("Winner by region: " + text)
 
     if show:
-        
+
         plt.show()
 
     return ax
@@ -395,9 +395,9 @@ def create_parliament_plot(sortedparl, colors, label, text, show=True):
         textprops={"fontsize": "large", "weight": "bold"},
     )
     plt.title("parliament composition: " + text, fontdict={"fontsize": 32})
-    
+
     if show:
-        
+
         plt.show()
 
     return ax

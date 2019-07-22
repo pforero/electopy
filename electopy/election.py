@@ -188,7 +188,9 @@ class election:
             )
         )
 
-        ax = electopy.display.create_map_plot(geo_and_most_voted, colormap, text, show=show)
+        ax = electopy.display.create_map_plot(
+            geo_and_most_voted, colormap, text, show=show
+        )
 
         return ax
 
@@ -222,7 +224,9 @@ class election:
             sorted_parliament.rename(self.parties).index
         )
 
-        ax = electopy.display.create_parliament_plot(sorted_parliament, colors, labels, text, show=show)
+        ax = electopy.display.create_parliament_plot(
+            sorted_parliament, colors, labels, text, show=show
+        )
 
         return ax
 

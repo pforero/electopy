@@ -106,6 +106,7 @@ def test_transform():
 
     assert all(election_votes_diff)
 
+
 def test_spain_map_plot():
     """Test function electopy.spain_map().
 
@@ -117,10 +118,11 @@ def test_spain_map_plot():
 
     xmin, xmax, ymin, ymax = map_plot.axis()
 
-    assert round(xmin,2) == -11.94
-    assert round(xmax,2) == 5.11
-    assert round(ymin,2) == 32.08
-    assert round(ymax,2) == 44.35
+    assert round(xmin, 2) == -11.94
+    assert round(xmax, 2) == 5.11
+    assert round(ymin, 2) == 32.08
+    assert round(ymax, 2) == 44.35
+
 
 def test_parliament_composition_plot():
     """Test function electopy.parliament_composition().
