@@ -106,5 +106,33 @@ def test_transform():
 
     assert all(election_votes_diff)
 
+def test_spain_map_plot():
+    """Test function electopy.spain_map().
 
-# cSpell: ignore votos diputados PSOE MIR's
+    Check if the spain_map plot axis has the correct axis limit dimensions.
+
+    """
+
+    map_plot = el.spain_map(show=False)
+
+    xmin, xmax, ymin, ymax = map_plot.axis()
+
+    assert round(xmin,2) == -11.94
+    assert round(xmax,2) == 5.11
+    assert round(ymin,2) == 32.08
+    assert round(ymax,2) == 44.35
+
+def test_parliament_composition_plot():
+    """Test function electopy.parliament_composition().
+
+    Check if the first wedge from the plot created by parliament_composition has the
+    value theta2, corresponding the angle of its representation.
+
+    """
+
+    parliament_plot = el.parliament_composition(show=False)
+
+    assert parliament_plot[0][0].theta2 == 230.9142816066742
+
+
+# cSpell: ignore votos diputados PSOE MIR's xmin xmax ymin ymax

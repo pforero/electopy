@@ -315,7 +315,7 @@ def party_colors():
 ## cSpell: enable
 
 
-def create_map_plot(merge, colormap, text):
+def create_map_plot(merge, colormap, text, show=True):
     """Display map of Spain with most voted party per region.
 
     Create and display the plot with the map of Spain, showing which party earned the
@@ -329,6 +329,13 @@ def create_map_plot(merge, colormap, text):
         The display colors used to create the map.
     text: str
         Additional text to add to the plot title.
+    show: bool
+        Indicate if the plot should be displayed.
+
+    Returns
+    -------
+    ax: plot
+        Map of Spain with the most voted party in each region.
 
     """
 
@@ -344,10 +351,14 @@ def create_map_plot(merge, colormap, text):
     ax.set_axis_off()
     ax.set_title("Winner by region: " + text)
 
-    plt.show()
+    if show:
+        
+        plt.show()
+
+    return ax
 
 
-def create_parliament_plot(sortedparl, colors, label, text):
+def create_parliament_plot(sortedparl, colors, label, text, show=True):
     """Display plot showing the parliament composition.
 
     Create and display a pie chart, showing the total number of elected mps in the
@@ -363,10 +374,17 @@ def create_parliament_plot(sortedparl, colors, label, text):
         Names of political parties to display in the plot.
     text: str
         Additional text to add to the plot title.
+    show: bool
+        Indicate if the plot should be displayed.
+
+    Returns
+    -------
+    ax: plot
+        Parliament composition by political party.
 
     """
 
-    plt.pie(
+    ax = plt.pie(
         sortedparl,
         colors=colors,
         wedgeprops=dict(width=0.5),
@@ -377,7 +395,12 @@ def create_parliament_plot(sortedparl, colors, label, text):
         textprops={"fontsize": "large", "weight": "bold"},
     )
     plt.title("parliament composition: " + text, fontdict={"fontsize": 32})
-    plt.show()
+    
+    if show:
+        
+        plt.show()
+
+    return ax
 
 
 def download_map():
