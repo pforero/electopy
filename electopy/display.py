@@ -43,94 +43,30 @@ def get_spain_map(x=0.0, y=0.0):
 
     """
 
+    FILE_NAME = "ne_10m_admin_1_states_provinces.zip"
+    SHAPE_LOCATION = "map/ne_10m_admin_1_states_provinces.shp"
+
     try:
 
-        map_df = gpd.read_file("map/ne_10m_admin_1_states_provinces.shp")
+        map_df = gpd.read_file(SHAPE_LOCATION)
 
     except:
 
-        download_map()
-        map_df = gpd.read_file("map/ne_10m_admin_1_states_provinces.shp")
+        try:
+
+            _unzip_file(FILE_NAME)
+
+        except:
+
+            _download_map()
+
+        map_df = gpd.read_file(SHAPE_LOCATION)
 
     spa = map_df.loc[map_df["iso_a2"] == "ES"].copy()
 
-    esp = electopy.display.move_canary(spa, x=x, y=y)
+    esp = electopy.display._move_canary(spa, x=x, y=y)
 
     return esp
-
-
-def move_canary(geo, x=0, y=0):
-    """Change the geographic position of the Canary Islands (CI).
-
-    Get a GeoPandas dataframe with geographical data for all regions in spain, and
-    transform the x and y coordinates of the geographic data of the regions which are
-    part of the Canary Islands (adm0_sr == 3).
-
-    Parameters
-    ----------
-    geo: GeoPandas.DataFrame
-        Geographic information (including geographic shape) for each region in Spain.
-    x: float
-        X-coordinate move of the Canary Islands from original position.
-    y: float
-        Y-coordinate move of the Canary Islands from original position.
-
-    Returns
-    -------
-    geo: GeoPandas.DataFrame
-        New geographic information for each region in Spain, including changes in CI.
-
-    """
-
-    geo.loc[geo["adm0_sr"] == 3, "geometry"] = geo.loc[
-        geo["adm0_sr"] == 3, "geometry"
-    ].apply(lambda n: shapely.affinity.translate(n, xoff=x, yoff=y))
-
-    return geo
-
-
-## cSpell: disable
-
-
-def correct_region_names():
-    """Dictionary with correct spelling of region names.
-
-    Natural Earth Data (NED) has the names of the regions with different spelling than 
-    those used by the Ministry of Interior (MIR) in Spain for electoral data. This
-    function returns a dictionary for every mispelt region in NED with the corresponding
-    correct spelling used in MIR.
-
-    Returns
-    -------
-    mapdict: dict
-        Mapping of mispelt regions to their correct spelling.
-
-    """
-
-    mapdict = {
-        "CÃ¡ceres": "Cáceres",
-        "Orense": "Ourense",
-        "CÃ¡diz": "Cádiz",
-        "CastellÃ³n": "Castellón / Castelló",
-        "AlmerÃ­a": "Almería",
-        "MÃ¡laga": "Málaga",
-        "La CoruÃ±a": "A Coruña",
-        "Ãlava": "Araba - Álava",
-        "LeÃ³n": "León",
-        "Ãvila": "Ávila",
-        "CÃ³rdoba": "Córdoba",
-        "JaÃ©n": "Jaén",
-        "Alicante": "Alicante / Alacant",
-        "Valencia": "Valencia / València",
-        "Baleares": "Illes Balears",
-        "Gerona": "Girona",
-        "LÃ©rida": "Lleida",
-    }
-
-    return mapdict
-
-
-## cSpell: enable
 
 
 def proper_names(esp):
@@ -151,13 +87,56 @@ def proper_names(esp):
 
     """
 
-    mapdict = electopy.display.correct_region_names()
+    mapdict = electopy.display._correct_region_names()
 
     esp = esp.assign(prov=esp["name"].replace(mapdict))
 
     esp = esp.set_index("prov")
 
     return esp
+
+
+def create_map_plot(merge, colormap, text, show=True):
+    """Display map of Spain with most voted party per region.
+
+    Create and display the plot with the map of Spain, showing which party earned the
+    most votes in each voting region.
+
+    Parameters
+    ----------
+    merge: GeoPandas.DataFrame
+        The shapes of the regions and the most voted party for each region.
+    colormap: list
+        The display colors used to create the map.
+    text: str
+        Additional text to add to the plot title.
+    show: bool
+        Indicate if the plot should be displayed.
+
+    Returns
+    -------
+    ax: plot
+        Map of Spain with the most voted party in each region.
+
+    """
+
+    ax = merge.plot(
+        column=0,
+        cmap=colormap,
+        linewidth=0.8,
+        edgecolor="0.8",
+        legend=True,
+        categorical=True,
+        legend_kwds={"loc": "lower right"},
+    )
+    ax.set_axis_off()
+    ax.set_title("Winner by region: " + text)
+
+    if show:
+
+        plt.show()
+
+    return ax
 
 
 def create_parliament_labels(parl, limit=6):
@@ -192,29 +171,49 @@ def create_parliament_labels(parl, limit=6):
     return label
 
 
-def display(pct):
-    """Function used to display the number of mps obtained by each party.
+def create_parliament_plot(sortedparl, colors, label, text, show=True):
+    """Display plot showing the parliament composition.
 
-    The function returns a string to display, if the party has obtained more than 1.5%
-    of the total mps. The percentage is multiplied by 3.5 in order to represent the
-    number of mps instead of the percentage. Currently there are 350 mps in the Spanish
-    parliament.
+    Create and display a pie chart, showing the total number of elected mps in the
+    parliament for each political party.
 
-    Parameter
-    ---------
-    pct: float
-        Percentage value.
+    Parameters
+    ----------
+    sortedparl: Series
+        Number of elected mps for each party, sorted by number of mps.
+    colors: list
+        The display colors used to create the plot.
+    label: list
+        Names of political parties to display in the plot.
+    text: str
+        Additional text to add to the plot title.
+    show: bool
+        Indicate if the plot should be displayed.
 
     Returns
     -------
-    :str
-        Number of mps.
+    ax: plot
+        Parliament composition by political party.
 
     """
 
-    if pct > 1.5:
+    ax = plt.pie(
+        sortedparl,
+        colors=colors,
+        wedgeprops=dict(width=0.5),
+        startangle=90,
+        labels=label,
+        autopct=lambda x: electopy.display._display(x),
+        pctdistance=0.75,
+        textprops={"fontsize": "large", "weight": "bold"},
+    )
+    plt.title("parliament composition: " + text, fontdict={"fontsize": 32})
 
-        return "{:.0f}".format(pct * 3.5)
+    if show:
+
+        plt.show()
+
+    return ax
 
 
 def create_colors(parties):
@@ -235,7 +234,7 @@ def create_colors(parties):
 
     """
 
-    partycolors = party_colors()
+    partycolors = _party_colors()
 
     colormap = np.vectorize(partycolors.get)(parties)
 
@@ -268,10 +267,124 @@ def create_colors(parties):
     return cmap
 
 
+def _download_map():
+    """Dowload Natural Earth Data map information.
+
+    Downloads for the Natural Earth Data the Admin 1 map, which contains the
+    geographical shapes of each region in the world. Importantly, for Spain, these match
+    the voting regions. The shapes are used to create plots with the map of Spain.
+
+    """
+
+    SAVE_FOLDER = "map"
+    MAP_ADDRESS = "https://www.naturalearthdata.com/http//www.naturalearthdata.com/download/10m/cultural/"
+    FILE_NAME = "ne_10m_admin_1_states_provinces.zip"
+
+    url = MAP_ADDRESS + FILE_NAME
+    save_location = SAVE_FOLDER + "/" + FILE_NAME
+
+    urllib.request.urlretrieve(url, save_location)
+
+    unzip_file(FILE_NAME)
+
+
+def _unzip_file(file_name):
+    """Unzip files from Natural Earth Data map.
+
+    Once downloaded the zip file from NED, unzip the file in the save folder.
+
+    Parameters
+    ----------
+    file_name: str
+        Name of file to unzip.
+
+    """
+
+    SAVE_FOLDER = "map"
+
+    save_location = SAVE_FOLDER + "/" + file_name
+
+    zip_ref = zipfile.ZipFile(save_location, "r")
+    zip_ref.extractall(SAVE_FOLDER + "/")
+    zip_ref.close()
+
+
+def _move_canary(geo, x=0, y=0):
+    """Change the geographic position of the Canary Islands (CI).
+
+    Get a GeoPandas dataframe with geographical data for all regions in spain, and
+    transform the x and y coordinates of the geographic data of the regions which are
+    part of the Canary Islands (adm0_sr == 3).
+
+    Parameters
+    ----------
+    geo: GeoPandas.DataFrame
+        Geographic information (including geographic shape) for each region in Spain.
+    x: float
+        X-coordinate move of the Canary Islands from original position.
+    y: float
+        Y-coordinate move of the Canary Islands from original position.
+
+    Returns
+    -------
+    geo: GeoPandas.DataFrame
+        New geographic information for each region in Spain, including changes in CI.
+
+    """
+
+    geo.loc[geo["adm0_sr"] == 3, "geometry"] = geo.loc[
+        geo["adm0_sr"] == 3, "geometry"
+    ].apply(lambda n: shapely.affinity.translate(n, xoff=x, yoff=y))
+
+    return geo
+
+
 ## cSpell: disable
 
 
-def party_colors():
+def _correct_region_names():
+    """Dictionary with correct spelling of region names.
+
+    Natural Earth Data (NED) has the names of the regions with different spelling than 
+    those used by the Ministry of Interior (MIR) in Spain for electoral data. This
+    function returns a dictionary for every mispelt region in NED with the corresponding
+    correct spelling used in MIR.
+
+    Returns
+    -------
+    mapdict: dict
+        Mapping of mispelt regions to their correct spelling.
+
+    """
+
+    mapdict = {
+        "CÃ¡ceres": "Cáceres",
+        "Orense": "Ourense",
+        "CÃ¡diz": "Cádiz",
+        "CastellÃ³n": "Castellón / Castelló",
+        "Castellón": "Castellón / Castelló",
+        "AlmerÃ­a": "Almería",
+        "MÃ¡laga": "Málaga",
+        "La CoruÃ±a": "A Coruña",
+        "La Coruña": "A Coruña",
+        "Ãlava": "Araba - Álava",
+        "Álava": "Araba - Álava",
+        "LeÃ³n": "León",
+        "Ãvila": "Ávila",
+        "CÃ³rdoba": "Córdoba",
+        "JaÃ©n": "Jaén",
+        "Alicante": "Alicante / Alacant",
+        "Valencia": "Valencia / València",
+        "Baleares": "Illes Balears",
+        "Gerona": "Girona",
+        "LÃ©rida": "Lleida",
+        "Lérida": "Lleida",
+    }
+
+    return mapdict
+
+
+def _party_colors():
     """Dictionary with political parties and their corresponding color.
 
     Return a dictionary with some political parties and the color normally used to
@@ -315,92 +428,29 @@ def party_colors():
 ## cSpell: enable
 
 
-def create_map_plot(merge, colormap, text):
-    """Display map of Spain with most voted party per region.
+def _display(pct):
+    """Function used to display the number of mps obtained by each party.
 
-    Create and display the plot with the map of Spain, showing which party earned the
-    most votes in each voting region.
+    The function returns a string to display, if the party has obtained more than 1.5%
+    of the total mps. The percentage is multiplied by 3.5 in order to represent the
+    number of mps instead of the percentage. Currently there are 350 mps in the Spanish
+    parliament.
 
-    Parameters
-    ----------
-    merge: GeoPandas.DataFrame
-        The shapes of the regions and the most voted party for each region.
-    colormap: list
-        The display colors used to create the map.
-    text: str
-        Additional text to add to the plot title.
+    Parameter
+    ---------
+    pct: float
+        Percentage value.
 
-    """
-
-    ax = merge.plot(
-        column=0,
-        cmap=colormap,
-        linewidth=0.8,
-        edgecolor="0.8",
-        legend=True,
-        categorical=True,
-        legend_kwds={"loc": "lower right"},
-    )
-    ax.set_axis_off()
-    ax.set_title("Winner by region: " + text)
-
-    plt.show()
-
-
-def create_parliament_plot(sortedparl, colors, label, text):
-    """Display plot showing the parliament composition.
-
-    Create and display a pie chart, showing the total number of elected mps in the
-    parliament for each political party.
-
-    Parameters
-    ----------
-    sortedparl: Series
-        Number of elected mps for each party, sorted by number of mps.
-    colors: list
-        The display colors used to create the plot.
-    label: list
-        Names of political parties to display in the plot.
-    text: str
-        Additional text to add to the plot title.
+    Returns
+    -------
+    :str
+        Number of mps.
 
     """
 
-    plt.pie(
-        sortedparl,
-        colors=colors,
-        wedgeprops=dict(width=0.5),
-        startangle=90,
-        labels=label,
-        autopct=lambda x: electopy.display.display(x),
-        pctdistance=0.75,
-        textprops={"fontsize": "large", "weight": "bold"},
-    )
-    plt.title("parliament composition: " + text, fontdict={"fontsize": 32})
-    plt.show()
+    if pct > 1.5:
 
-
-def download_map():
-    """Dowload Natural Earth Data map information.
-
-    Downloads for the Natural Earth Data the Admin 1 map, which contains the
-    geographical shapes of each region in the world. Importantly, for Spain, these match
-    the voting regions. The shapes are used to create plots with the map of Spain.
-
-    """
-
-    SAVE_FOLDER = "map"
-    MAP_ADDRESS = "https://www.naturalearthdata.com/http//www.naturalearthdata.com/download/10m/cultural/"
-    FILE_NAME = "ne_10m_admin_1_states_provinces.zip"
-
-    url = MAP_ADDRESS + FILE_NAME
-    save_location = SAVE_FOLDER + "/" + FILE_NAME
-
-    urllib.request.urlretrieve(url, save_location)
-
-    zip_ref = zipfile.ZipFile(save_location, "r")
-    zip_ref.extractall(SAVE_FOLDER + "/")
-    zip_ref.close()
+        return "{:.0f}".format(pct * 3.5)
 
 
 ## cSpell: ignore xoff yoff cmap vectorize prov parl sortedparl colormap edgecolor autopct pctdistance fontdict

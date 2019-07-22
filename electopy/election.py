@@ -147,7 +147,7 @@ class election:
 
         return most_voted
 
-    def spain_map(self, canary_x=7, canary_y=5, text=""):
+    def spain_map(self, canary_x=7, canary_y=5, text="", show=True):
         """Display a map of Spain with the most voted party in each region.
 
         Creates and displays a map of Spain representing the most voted party in each
@@ -161,6 +161,13 @@ class election:
             Y-coordinate move of the Canary Islands from original position.
         text: str
             Additional text to add to the plot title.
+        show: bool
+            Indicate if the plot should be displayed.
+
+        Returns
+        -------
+        ax: plot
+            Map of Spain with the most voted party in each region.
 
         """
 
@@ -181,9 +188,13 @@ class election:
             )
         )
 
-        electopy.display.create_map_plot(geo_and_most_voted, colormap, text)
+        ax = electopy.display.create_map_plot(
+            geo_and_most_voted, colormap, text, show=show
+        )
 
-    def parliament_composition(self, text=""):
+        return ax
+
+    def parliament_composition(self, text="", show=True):
         """Display composition of the parliament by elected mps for each political party.
 
         Creates and displays a pie chart with the representation of the number of
@@ -193,6 +204,13 @@ class election:
         ----------
         text: str
             Additional text to add to the plot title.
+        show: bool
+            Indicate if the plot should be displayed.
+
+        Returns
+        -------
+        ax: plot
+            Parliament composition by political party.
         
         """
 
@@ -206,7 +224,11 @@ class election:
             sorted_parliament.rename(self.parties).index
         )
 
-        electopy.display.create_parliament_plot(sorted_parliament, colors, labels, text)
+        ax = electopy.display.create_parliament_plot(
+            sorted_parliament, colors, labels, text, show=show
+        )
+
+        return ax
 
     def transform(self, party_benefiting, party_losing, weight=1.0):
         """Create a new election by changing the results of the election.
