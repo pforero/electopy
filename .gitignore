@@ -108,11 +108,11 @@ venv.bak/
 electopy_workspace.code-workspace
 
 #map
-ne_10m_admin_1_states_provinces.cpg
-ne_10m_admin_1_states_provinces.dbf
-ne_10m_admin_1_states_provinces.prj
-ne_10m_admin_1_states_provinces.README.html
-ne_10m_admin_1_states_provinces.shp
-ne_10m_admin_1_states_provinces.shx
-ne_10m_admin_1_states_provinces.VERSION.txt
+#ne_10m_admin_1_states_provinces.cpg
+#ne_10m_admin_1_states_provinces.dbf
+#ne_10m_admin_1_states_provinces.prj
+#ne_10m_admin_1_states_provinces.README.html
+#ne_10m_admin_1_states_provinces.shp
+#ne_10m_admin_1_states_provinces.shx
+#ne_10m_admin_1_states_provinces.VERSION.txt
 #ne_10m_admin_1_states_provinces.zip

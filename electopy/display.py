@@ -54,93 +54,19 @@ def get_spain_map(x=0.0, y=0.0):
 
         try:
 
-            unzip_file(FILE_NAME)
+            _unzip_file(FILE_NAME)
 
         except:
 
-            download_map()
+            _download_map()
 
         map_df = gpd.read_file(SHAPE_LOCATION)
 
     spa = map_df.loc[map_df["iso_a2"] == "ES"].copy()
 
-    esp = electopy.display.move_canary(spa, x=x, y=y)
+    esp = electopy.display._move_canary(spa, x=x, y=y)
 
     return esp
-
-
-def move_canary(geo, x=0, y=0):
-    """Change the geographic position of the Canary Islands (CI).
-
-    Get a GeoPandas dataframe with geographical data for all regions in spain, and
-    transform the x and y coordinates of the geographic data of the regions which are
-    part of the Canary Islands (adm0_sr == 3).
-
-    Parameters
-    ----------
-    geo: GeoPandas.DataFrame
-        Geographic information (including geographic shape) for each region in Spain.
-    x: float
-        X-coordinate move of the Canary Islands from original position.
-    y: float
-        Y-coordinate move of the Canary Islands from original position.
-
-    Returns
-    -------
-    geo: GeoPandas.DataFrame
-        New geographic information for each region in Spain, including changes in CI.
-
-    """
-
-    geo.loc[geo["adm0_sr"] == 3, "geometry"] = geo.loc[
-        geo["adm0_sr"] == 3, "geometry"
-    ].apply(lambda n: shapely.affinity.translate(n, xoff=x, yoff=y))
-
-    return geo
-
-
-## cSpell: disable
-
-
-def correct_region_names():
-    """Dictionary with correct spelling of region names.
-
-    Natural Earth Data (NED) has the names of the regions with different spelling than 
-    those used by the Ministry of Interior (MIR) in Spain for electoral data. This
-    function returns a dictionary for every mispelt region in NED with the corresponding
-    correct spelling used in MIR.
-
-    Returns
-    -------
-    mapdict: dict
-        Mapping of mispelt regions to their correct spelling.
-
-    """
-
-    mapdict = {
-        "CÃ¡ceres": "Cáceres",
-        "Orense": "Ourense",
-        "CÃ¡diz": "Cádiz",
-        "CastellÃ³n": "Castellón / Castelló",
-        "AlmerÃ­a": "Almería",
-        "MÃ¡laga": "Málaga",
-        "La CoruÃ±a": "A Coruña",
-        "Ãlava": "Araba - Álava",
-        "LeÃ³n": "León",
-        "Ãvila": "Ávila",
-        "CÃ³rdoba": "Córdoba",
-        "JaÃ©n": "Jaén",
-        "Alicante": "Alicante / Alacant",
-        "Valencia": "Valencia / València",
-        "Baleares": "Illes Balears",
-        "Gerona": "Girona",
-        "LÃ©rida": "Lleida",
-    }
-
-    return mapdict
-
-
-## cSpell: enable
 
 
 def proper_names(esp):
@@ -161,168 +87,13 @@ def proper_names(esp):
 
     """
 
-    mapdict = electopy.display.correct_region_names()
+    mapdict = electopy.display._correct_region_names()
 
     esp = esp.assign(prov=esp["name"].replace(mapdict))
 
     esp = esp.set_index("prov")
 
     return esp
-
-
-def create_parliament_labels(parl, limit=6):
-    """Format the party labels shown in the parliament composition.
-
-    Create the labels used to display the party names in the parliament composition.
-    Limit is used to only show the most voted political parties. Parties over the limit
-    will have an empty label.
-
-    Parameters
-    ----------
-    parl: Series
-        Ordered list of all political parties with representation in parliament.
-    limit: int
-        Maximum number of parties which have a label on the plot.
-
-    Returns
-    -------
-    label: list
-        The labels used to plot the parties' names in parliament composition.
-
-    """
-
-    label = list(parl.index)
-
-    for i, v in enumerate(label):
-
-        if parl[v] < limit:
-
-            label[i] = ""
-
-    return label
-
-
-def display(pct):
-    """Function used to display the number of mps obtained by each party.
-
-    The function returns a string to display, if the party has obtained more than 1.5%
-    of the total mps. The percentage is multiplied by 3.5 in order to represent the
-    number of mps instead of the percentage. Currently there are 350 mps in the Spanish
-    parliament.
-
-    Parameter
-    ---------
-    pct: float
-        Percentage value.
-
-    Returns
-    -------
-    :str
-        Number of mps.
-
-    """
-
-    if pct > 1.5:
-
-        return "{:.0f}".format(pct * 3.5)
-
-
-def create_colors(parties):
-    """Make a list of colors for plots.
-
-    Create the list of colors used to display. If the party exists in the party_colors
-    dictionary, use the party's corresponding colour. Else use a random colour.
-
-    Parameters
-    ----------
-    parties: list
-        Names of parties which are displayed in the plot.
-
-    Returns
-    -------
-    cmap: list
-        List of colors used in the plot.
-
-    """
-
-    partycolors = party_colors()
-
-    colormap = np.vectorize(partycolors.get)(parties)
-
-    missing = np.sum(colormap == "None")
-
-    if missing > 10:
-
-        extracolors = cm.get_cmap("tab20", 20)(np.linspace(0, 1, 20))
-
-    else:
-
-        extracolors = cm.get_cmap("tab10", 10)(np.linspace(0, 1, 10))
-
-    i = 0
-    cmap = []
-
-    for party in parties:
-
-        try:
-
-            c = partycolors[party]
-
-        except:
-
-            c = extracolors[i]
-            i += 1
-
-        cmap.append(c)
-
-    return cmap
-
-
-## cSpell: disable
-
-
-def party_colors():
-    """Dictionary with political parties and their corresponding color.
-
-    Return a dictionary with some political parties and the color normally used to
-    represent the party visually.
-
-    Returns
-    -------
-    pc: dict
-        Dictionary with partie's name and their color.
-
-    """
-
-    pc = {
-        "PSOE": "#ED1C24",
-        "PP": "#0055A7",
-        "Cs": "#FA5000",
-        "C's": "#FA5000",
-        "Podemos": "#6A2E68",
-        "PODEMOS-IU-EQUO": "#6A2E68",
-        "ECP": "#6A2E68",
-        "PODEMOS-EN MAREA-ANOVA-EU": "#6A2E68",
-        "VOX": "#5AC035",
-        "ERC": "#F3B217",
-        "ERC-CATSÍ": "#F3B217",
-        "CDC": "#C40048",
-        "JxCAT": "#C40048",
-        "PNV": "#009526",
-        "EAJ-PNV": "#009526",
-        "EH Bildu": "#A3C940",
-        "NA+": "#FFDA1A",
-        "CC": "#E51C13",
-        "CCa-PNC": "#E51C13",
-        "PRC": "#DB6426",
-        "COMPROMÍS": "#BECD48",
-        "PODEMOS-COMPROMÍS-EUPV": "#BECD48",
-    }
-
-    return pc
-
-
-## cSpell: enable
 
 
 def create_map_plot(merge, colormap, text, show=True):
@@ -368,6 +139,68 @@ def create_map_plot(merge, colormap, text, show=True):
     return ax
 
 
+def _move_canary(geo, x=0, y=0):
+    """Change the geographic position of the Canary Islands (CI).
+
+    Get a GeoPandas dataframe with geographical data for all regions in spain, and
+    transform the x and y coordinates of the geographic data of the regions which are
+    part of the Canary Islands (adm0_sr == 3).
+
+    Parameters
+    ----------
+    geo: GeoPandas.DataFrame
+        Geographic information (including geographic shape) for each region in Spain.
+    x: float
+        X-coordinate move of the Canary Islands from original position.
+    y: float
+        Y-coordinate move of the Canary Islands from original position.
+
+    Returns
+    -------
+    geo: GeoPandas.DataFrame
+        New geographic information for each region in Spain, including changes in CI.
+
+    """
+
+    geo.loc[geo["adm0_sr"] == 3, "geometry"] = geo.loc[
+        geo["adm0_sr"] == 3, "geometry"
+    ].apply(lambda n: shapely.affinity.translate(n, xoff=x, yoff=y))
+
+    return geo
+
+
+def create_parliament_labels(parl, limit=6):
+    """Format the party labels shown in the parliament composition.
+
+    Create the labels used to display the party names in the parliament composition.
+    Limit is used to only show the most voted political parties. Parties over the limit
+    will have an empty label.
+
+    Parameters
+    ----------
+    parl: Series
+        Ordered list of all political parties with representation in parliament.
+    limit: int
+        Maximum number of parties which have a label on the plot.
+
+    Returns
+    -------
+    label: list
+        The labels used to plot the parties' names in parliament composition.
+
+    """
+
+    label = list(parl.index)
+
+    for i, v in enumerate(label):
+
+        if parl[v] < limit:
+
+            label[i] = ""
+
+    return label
+
+
 def create_parliament_plot(sortedparl, colors, label, text, show=True):
     """Display plot showing the parliament composition.
 
@@ -400,7 +233,7 @@ def create_parliament_plot(sortedparl, colors, label, text, show=True):
         wedgeprops=dict(width=0.5),
         startangle=90,
         labels=label,
-        autopct=lambda x: electopy.display.display(x),
+        autopct=lambda x: electopy.display._display(x),
         pctdistance=0.75,
         textprops={"fontsize": "large", "weight": "bold"},
     )
@@ -413,7 +246,58 @@ def create_parliament_plot(sortedparl, colors, label, text, show=True):
     return ax
 
 
-def download_map():
+def create_colors(parties):
+    """Make a list of colors for plots.
+
+    Create the list of colors used to display. If the party exists in the party_colors
+    dictionary, use the party's corresponding colour. Else use a random colour.
+
+    Parameters
+    ----------
+    parties: list
+        Names of parties which are displayed in the plot.
+
+    Returns
+    -------
+    cmap: list
+        List of colors used in the plot.
+
+    """
+
+    partycolors = _party_colors()
+
+    colormap = np.vectorize(partycolors.get)(parties)
+
+    missing = np.sum(colormap == "None")
+
+    if missing > 10:
+
+        extracolors = cm.get_cmap("tab20", 20)(np.linspace(0, 1, 20))
+
+    else:
+
+        extracolors = cm.get_cmap("tab10", 10)(np.linspace(0, 1, 10))
+
+    i = 0
+    cmap = []
+
+    for party in parties:
+
+        try:
+
+            c = partycolors[party]
+
+        except:
+
+            c = extracolors[i]
+            i += 1
+
+        cmap.append(c)
+
+    return cmap
+
+
+def _download_map():
     """Dowload Natural Earth Data map information.
 
     Downloads for the Natural Earth Data the Admin 1 map, which contains the
@@ -434,7 +318,7 @@ def download_map():
     unzip_file(FILE_NAME)
 
 
-def unzip_file(file_name):
+def _unzip_file(file_name):
     """Unzip files from Natural Earth Data map.
 
     Once downloaded the zip file from NED, unzip the file in the save folder.
@@ -453,6 +337,116 @@ def unzip_file(file_name):
     zip_ref = zipfile.ZipFile(save_location, "r")
     zip_ref.extractall(SAVE_FOLDER + "/")
     zip_ref.close()
+
+
+## cSpell: disable
+
+
+def _correct_region_names():
+    """Dictionary with correct spelling of region names.
+
+    Natural Earth Data (NED) has the names of the regions with different spelling than 
+    those used by the Ministry of Interior (MIR) in Spain for electoral data. This
+    function returns a dictionary for every mispelt region in NED with the corresponding
+    correct spelling used in MIR.
+
+    Returns
+    -------
+    mapdict: dict
+        Mapping of mispelt regions to their correct spelling.
+
+    """
+
+    mapdict = {
+        "CÃ¡ceres": "Cáceres",
+        "Orense": "Ourense",
+        "CÃ¡diz": "Cádiz",
+        "CastellÃ³n": "Castellón / Castelló",
+        "AlmerÃ­a": "Almería",
+        "MÃ¡laga": "Málaga",
+        "La CoruÃ±a": "A Coruña",
+        "Ãlava": "Araba - Álava",
+        "LeÃ³n": "León",
+        "Ãvila": "Ávila",
+        "CÃ³rdoba": "Córdoba",
+        "JaÃ©n": "Jaén",
+        "Alicante": "Alicante / Alacant",
+        "Valencia": "Valencia / València",
+        "Baleares": "Illes Balears",
+        "Gerona": "Girona",
+        "LÃ©rida": "Lleida",
+    }
+
+    return mapdict
+
+
+def _party_colors():
+    """Dictionary with political parties and their corresponding color.
+
+    Return a dictionary with some political parties and the color normally used to
+    represent the party visually.
+
+    Returns
+    -------
+    pc: dict
+        Dictionary with partie's name and their color.
+
+    """
+
+    pc = {
+        "PSOE": "#ED1C24",
+        "PP": "#0055A7",
+        "Cs": "#FA5000",
+        "C's": "#FA5000",
+        "Podemos": "#6A2E68",
+        "PODEMOS-IU-EQUO": "#6A2E68",
+        "ECP": "#6A2E68",
+        "PODEMOS-EN MAREA-ANOVA-EU": "#6A2E68",
+        "VOX": "#5AC035",
+        "ERC": "#F3B217",
+        "ERC-CATSÍ": "#F3B217",
+        "CDC": "#C40048",
+        "JxCAT": "#C40048",
+        "PNV": "#009526",
+        "EAJ-PNV": "#009526",
+        "EH Bildu": "#A3C940",
+        "NA+": "#FFDA1A",
+        "CC": "#E51C13",
+        "CCa-PNC": "#E51C13",
+        "PRC": "#DB6426",
+        "COMPROMÍS": "#BECD48",
+        "PODEMOS-COMPROMÍS-EUPV": "#BECD48",
+    }
+
+    return pc
+
+
+## cSpell: enable
+
+
+def _display(pct):
+    """Function used to display the number of mps obtained by each party.
+
+    The function returns a string to display, if the party has obtained more than 1.5%
+    of the total mps. The percentage is multiplied by 3.5 in order to represent the
+    number of mps instead of the percentage. Currently there are 350 mps in the Spanish
+    parliament.
+
+    Parameter
+    ---------
+    pct: float
+        Percentage value.
+
+    Returns
+    -------
+    :str
+        Number of mps.
+
+    """
+
+    if pct > 1.5:
+
+        return "{:.0f}".format(pct * 3.5)
 
 
 ## cSpell: ignore xoff yoff cmap vectorize prov parl sortedparl colormap edgecolor autopct pctdistance fontdict
